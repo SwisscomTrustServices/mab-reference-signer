@@ -1,14 +1,13 @@
 qtsp:
   base-url: https://rax-preprod.scapp.swisscom.com
   oidc:
-    discovery-path:
-      /api/auth/realms/broker/.well-known/openid-configuration
+    discovery-path: /api/auth/realms/broker/.well-known/openid-configuration
   client:
-    clientId: "783328de-33cb-4570-bc7a-fbee6f1c2773"
-    clientSecret: "5902ce7c-ad57-4c2f-8d9e-32d3e54daa95"
-    redirectUri: https://rax-preprod.scapp.swisscom.com
+    client-id: "783328de-33cb-4570-bc7a-fbee6f1c2773"
+    client-secret: "5902ce7c-ad57-4c2f-8d9e-32d3e54daa95"
+    redirect-uri: https://rax-preprod.scapp.swisscom.com
   mtls:
-    base-url-auth: https://rax-preprod.mtls-scapp.swisscom.com
+    base-url: https://rax-preprod.mtls-scapp.swisscom.com
     client-cert: classpath:test-client.pem
     client-key: classpath:test-client.key
 
@@ -17,6 +16,10 @@ server:
 
 logging:
   level:
-    reactor.netty.http.client: WARN
-    io.netty.handler.ssl: WARN
+    reactor.netty: WARN
+    io.netty: WARN
     io.netty.handler.ssl.BouncyCastlePemReader: ERROR
+
+spring:
+  profiles:
+    active: dev

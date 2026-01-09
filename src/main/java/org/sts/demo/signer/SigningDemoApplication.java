@@ -3,6 +3,7 @@ package org.sts.demo.signer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.sts.demo.signer.config.QtspProperties;
 
 @EnableConfigurationProperties(QtspProperties.class)
 @SpringBootApplication

@@ -1,12 +1,13 @@
-package org.sts.demo.signer.OidcDiscovery;
+package org.sts.demo.signer.oidc.discovery;
 
 import org.springframework.stereotype.Service;
+import org.sts.demo.signer.oidc.model.OidcDiscoveryLoose;
 
 @Service
-public class OidcDiscoveryClient {
+public class OidcDiscoveryService {
     private final OidcDiscoveryCache cache;
 
-    public OidcDiscoveryClient(OidcDiscoveryCache cache) {
+    public OidcDiscoveryService(OidcDiscoveryCache cache) {
         this.cache = cache;
     }
 
