@@ -3,10 +3,10 @@ package org.sts.demo.signer.OidcDiscovery;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.sts.demo.signer.QtspProperties;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,17 +24,21 @@ public class OidcDiscoveryCache {
 
     public OidcDiscoveryCache(
             WebClient qtspPublicWebClient,
-            @Value("${qtsp.oidc.discovery-path}") String discoveryPath
+            QtspProperties props
     ) {
         this.publicClient = qtspPublicWebClient;
-        this.discoveryPath = discoveryPath;
+        this.discoveryPath = props.getOidc().getDiscoveryPath();
     }
 
     @PostConstruct
     public void init() {
-        log.info("Fetching OIDC discovery at startup …");
+        log.info("Fetching OIDC discovery at startup");
         refresh();
-        log.info("OIDC discovery loaded: issuer={}", cached.get().issuer());
+        log.info(
+                "OIDC discovery loaded: issuer={}, parEndpoint={}",
+                cached.get().issuer(),
+                cached.get().pushed_authorization_request_endpoint()
+        );
     }
 
     public OidcDiscoveryLoose get() {

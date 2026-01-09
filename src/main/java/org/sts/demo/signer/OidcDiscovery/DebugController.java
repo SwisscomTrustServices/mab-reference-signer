@@ -30,9 +30,9 @@ public class DebugController {
     }
 
     @GetMapping("/par")
-    public void par() {
+    public void par() throws Exception {
         ParResponse response = mabService.pushPar().block();
         assert response != null;
-        log.info(response.toString());
+        log.info(response.getRequestUri());
     }
 }

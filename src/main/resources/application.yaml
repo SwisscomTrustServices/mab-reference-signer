@@ -1,32 +1,22 @@
 qtsp:
   base-url: https://rax-preprod.scapp.swisscom.com
-  base-url-auth: https://rax-preprod.mtls-scapp.swisscom.com
-  redirectUri: https://rax-preprod.scapp.swisscom.com
   oidc:
     discovery-path:
       /api/auth/realms/broker/.well-known/openid-configuration
   client:
-    clientId: "${MAB_CLIENT_ID:783328de-33cb-4570-bc7a-fbee6f1c2773}"
-    clientSecret: "${MAB_CLIENT_SECRET:5902ce7c-ad57-4c2f-8d9e-32d3e54daa95}"
+    clientId: "783328de-33cb-4570-bc7a-fbee6f1c2773"
+    clientSecret: "5902ce7c-ad57-4c2f-8d9e-32d3e54daa95"
+    redirectUri: https://rax-preprod.scapp.swisscom.com
+  mtls:
+    base-url-auth: https://rax-preprod.mtls-scapp.swisscom.com
+    client-cert: classpath:test-client.pem
+    client-key: classpath:test-client.key
 
 server:
   port: 8081
 
-spring:
-  ssl:
-    bundle:
-      jks:
-        qtsp-mtls:
-          key:
-            store: classpath:mtls-client-keystore.p12
-            store-password: changeit
-            store-type: PKCS12
-            password: changeit
-            alias: client
-  jackson:
-    default-property-inclusion: non_null
-
 logging:
   level:
-    reactor.netty.http.client: DEBUG
-    io.netty.handler.ssl: DEBUG
+    reactor.netty.http.client: WARN
+    io.netty.handler.ssl: WARN
+    io.netty.handler.ssl.BouncyCastlePemReader: ERROR

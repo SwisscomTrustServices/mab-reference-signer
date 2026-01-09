@@ -7,14 +7,14 @@ import org.openapi.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.sts.demo.signer.QtspProperties;
 import reactor.netty.http.client.HttpClient;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.*;
 
@@ -27,11 +27,15 @@ public class QtspMtlsHttpConfig {
     @Bean(name = "qtspMtlsWebClient")
     @Qualifier("qtspMtlsWebClient")
     WebClient qtspMtlsWebClient(
-            @Value("${qtsp.base-url-auth}") String baseUrl
+            QtspProperties props,
+            ResourceLoader resourceLoader
     ) throws Exception {
 
-        File certFile = copyClasspathToTempFile("test-client.pem", "qtsp-cert", ".pem");
-        File keyFile  = copyClasspathToTempFile("test-client.key", "qtsp-key", ".key");
+        Resource certResource = resourceLoader.getResource(props.getMtls().getClientCert());
+        Resource keyResource = resourceLoader.getResource(props.getMtls().getClientKey());
+
+        File certFile = copyToTempFile(certResource, "qtsp-cert", ".pem");
+        File keyFile = copyToTempFile(keyResource, "qtsp-key", ".key");
 
         SslContext nettySslContext = SslContextBuilder.forClient()
                 .protocols("TLSv1.2")
@@ -39,11 +43,10 @@ public class QtspMtlsHttpConfig {
                 .build();
 
         HttpClient httpClient = HttpClient.create()
-                .wiretap(true)
                 .secure(ssl -> ssl.sslContext(nettySslContext));
 
         return WebClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(props.getMtls().getBaseUrlAuth())
                 .filter((req, next) -> {
                     log.info("[QTSP-mTLS bean] {} {}", req.method(), req.url());
                     return next.exchange(req);
@@ -52,35 +55,25 @@ public class QtspMtlsHttpConfig {
                 .build();
     }
 
-    private static File copyClasspathToTempFile(String resource, String prefix, String suffix) throws IOException {
-        try (InputStream in = new ClassPathResource(resource).getInputStream()) {
-            File tmp = File.createTempFile(prefix, suffix);
-            tmp.deleteOnExit();
-            try (OutputStream out = new FileOutputStream(tmp)) {
-                in.transferTo(out);
-            }
-            return tmp;
+    private static File copyToTempFile(Resource resource, String prefix, String suffix) throws IOException {
+        File tmp = File.createTempFile(prefix, suffix);
+        tmp.deleteOnExit();
+        try (InputStream in = resource.getInputStream();
+             OutputStream out = new FileOutputStream(tmp)) {
+            in.transferTo(out);
         }
+        return tmp;
     }
 
     @Bean(name = "qtspMtlsApiClient")
     @Qualifier("qtspMtlsApiClient")
     ApiClient qtspMtlsApiClient(
             @Qualifier("qtspMtlsWebClient") WebClient mtlsWebClient,
-            @Value("${qtsp.base-url-auth}") String baseUrl
+            QtspProperties props
     ) {
         var apiClient = new ApiClient(mtlsWebClient);
-        apiClient.setBasePath(baseUrl);
+        apiClient.setBasePath(props.getMtls().getBaseUrlAuth());
         apiClient.addDefaultHeader("Accept", "application/json");
-
-        // ✅ important: affects the OpenAPI-generated client serialization
-        apiClient.getObjectMapper().setDefaultPropertyInclusion(
-                JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_EMPTY)
-        );
-
-        // prove it
-        log.info("ApiClient ObjectMapper inclusion = {}",
-                apiClient.getObjectMapper().getSerializationConfig().getDefaultPropertyInclusion());
 
         return apiClient;
     }
