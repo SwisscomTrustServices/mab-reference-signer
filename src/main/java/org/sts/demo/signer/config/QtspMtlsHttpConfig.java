@@ -8,12 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.io.*;
+import java.io.File;
 
 import static org.sts.demo.signer.crypto.NettySslContexts.mtlsClientTls12;
 import static org.sts.demo.signer.crypto.PemMaterialLoader.toTempFile;
@@ -26,8 +25,7 @@ public class QtspMtlsHttpConfig {
 
     @Bean(name = "qtspMtlsWebClient")
     WebClient qtspMtlsWebClient(
-            QtspProperties props,
-            ResourceLoader resourceLoader
+            QtspProperties props
     ) throws Exception {
 
         File certFile = toTempFile(props.getMtls().getClientCert(), "qtsp-cert", ".pem");

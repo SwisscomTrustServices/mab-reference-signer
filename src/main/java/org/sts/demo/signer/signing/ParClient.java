@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import org.sts.demo.signer.json.JsonNullPruner;
+import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import reactor.core.publisher.Mono;
 
 @Component
