@@ -1,9 +1,9 @@
 package org.sts.demo.signer.signing;
 
-import org.openapi.model.CreateParRequest;
-import org.openapi.model.CreateParRequestClaims;
-import org.openapi.model.CreateParRequestClaimsDocumentDigestsInner;
-import org.openapi.model.ParResponse;
+import org.openapi.mab.model.CreateParRequest;
+import org.openapi.mab.model.CreateParRequestClaims;
+import org.openapi.mab.model.CreateParRequestClaimsDocumentDigestsInner;
+import org.openapi.mab.model.ParResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

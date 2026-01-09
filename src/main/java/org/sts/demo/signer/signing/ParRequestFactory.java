@@ -1,7 +1,7 @@
 package org.sts.demo.signer.signing;
 
-import org.openapi.model.CreateParRequest;
-import org.openapi.model.CreateParRequestClaims;
+import org.openapi.mab.model.CreateParRequest;
+import org.openapi.mab.model.CreateParRequestClaims;
 import org.springframework.stereotype.Component;
 import org.sts.demo.signer.config.QtspProperties;
 

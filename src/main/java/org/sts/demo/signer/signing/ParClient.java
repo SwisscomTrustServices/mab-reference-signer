@@ -1,9 +1,9 @@
 package org.sts.demo.signer.signing;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.openapi.invoker.ApiClient;
-import org.openapi.model.CreateParRequest;
-import org.openapi.model.ParResponse;
+import org.openapi.mab.invoker.ApiClient;
+import org.openapi.mab.model.CreateParRequest;
+import org.openapi.mab.model.ParResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

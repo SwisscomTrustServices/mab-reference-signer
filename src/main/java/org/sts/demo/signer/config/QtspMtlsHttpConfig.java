@@ -1,8 +1,9 @@
 package org.sts.demo.signer.config;
 
 import io.netty.handler.ssl.SslContext;
-import org.openapi.api.OidcApi;
-import org.openapi.invoker.ApiClient;
+
+import org.openapi.mab.api.OidcApi;
+import org.openapi.mab.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

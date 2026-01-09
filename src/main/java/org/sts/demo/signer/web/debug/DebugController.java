@@ -1,6 +1,6 @@
 package org.sts.demo.signer.web.debug;
 
-import org.openapi.model.ParResponse;
+import org.openapi.mab.model.ParResponse;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -22,19 +22,24 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework:spring-webflux'
+    implementation "io.projectreactor.netty:reactor-netty-http"
     implementation "org.openapitools:jackson-databind-nullable:0.2.6"
-    implementation 'org.apache.pdfbox:pdfbox:2.0.31'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation ("org.apache.pdfbox:pdfbox:2.0.31") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    runtimeOnly "io.netty:netty-resolver-dns-native-macos:4.1.108.Final:osx-aarch_64"
+    runtimeOnly("io.netty:netty-resolver-dns-native-macos") {
+        artifact {
+            classifier = "osx-aarch_64" // Apple Silicon
+        }
+    }
 }
 
 test {
@@ -46,9 +51,9 @@ tasks.register("generateMabClient", GenerateTask) {
     library = "webclient" // generates a WebClient-based client
     inputSpec = "$rootDir/src/main/resources/mab-api.json"
     outputDir = "$projectDir/build/generated/mab-client/"
-    apiPackage = "org.openapi.api"
-    modelPackage = "org.openapi.model"
-    invokerPackage = "org.openapi.invoker"
+    apiPackage = "org.openapi.mab.api"
+    modelPackage = "org.openapi.mab.model"
+    invokerPackage = "org.openapi.mab.invoker"
     configOptions = [
             dateLibrary: "java8",
             useJakartaEe: "true"
@@ -60,9 +65,9 @@ tasks.register("generateEtsiClient", GenerateTask) {
     library = "webclient" // generates a WebClient-based client
     inputSpec = "$rootDir/src/main/resources/etsi-sign-api.json"
     outputDir = "$projectDir/build/generated/etsi-client/"
-    apiPackage = "org.openapi.api"
-    modelPackage = "org.openapi.model"
-    invokerPackage = "org.openapi.invoker"
+    apiPackage = "org.openapi.etsi.api"
+    modelPackage = "org.openapi.etsi.model"
+    invokerPackage = "org.openapi.etsi.invoker"
     configOptions = [
             dateLibrary: "java8",
             useJakartaEe: "true"
@@ -74,6 +79,7 @@ sourceSets {
     main {
         java {
             srcDir "$projectDir/build/generated/mab-client/src/main/java"
+            srcDir "$projectDir/build/generated/etsi-client/src/main/java"
         }
     }
 }
