@@ -1,0 +1,2703 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MAB API",
+    "description": "The multiple authentication broker (MAB) platform is a new product launched by Swisscom Trust Services in 2023 \nand enables electronic signature capabilities (AES and QES) supporting various authentication and identification methods. \nThe service consists of a set of Application Programming Interface (APIs) based on OpenID Connect OIDC and \nEuropean Telecommunications Standards Institute (ETSI) compliant with eIDAS (Electronic Identification, \nAuthentication and Trust Services) or ZertES (Zertifizierungsdienste im Bereich der elektronischen Signatur) regulations.",
+    "version": "1.0",
+    "contact": {
+      "name": "Swisscom Trust Services",
+      "url": "https://trustservices.swisscom.com"
+    },
+    "license": {
+      "name": "Swisscom License",
+      "url": "https://trustservices.swisscom.com"
+    },
+    "termsOfService": "https://www.swisscom.ch/en/residential/legal-information.html"
+  },
+  "tags": [
+    {
+      "name": "oidc",
+      "description": "oidc operations"
+    }
+  ],
+  "externalDocs": {
+    "description": "Partner Area",
+    "url": "https://trustservices.swisscom.com/en/support/help-center/partner-area"
+  },
+  "servers": [
+    {
+      "url": "https://auth.trustservices.swisscom.com"
+    },
+    {
+      "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ClientNotificationToken": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "the error_code",
+            "example": "error_code"
+          },
+          "error_cause": {
+            "type": "string",
+            "description": "the error_cause",
+            "example": "error_cause"
+          },
+          "error_description": {
+            "type": "string",
+            "description": "the error description",
+            "example": "error description"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "the MAB transaction id",
+            "example": "YXEH5C"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "OpenIdConfiguration": {
+        "type": "object",
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "authorization_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "csc_v1_authorization_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "token_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "introspection_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "userinfo_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "end_session_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "jwks_uri": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "grant_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "authorization_code",
+                "client_credentials"
+              ]
+            }
+          },
+          "response_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subject_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id_token_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id_token_encryption_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id_token_encryption_enc_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "userinfo_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "request_object_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "request_object_encryption_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "request_object_encryption_enc_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "response_modes_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "registration_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "token_endpoint_auth_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "token_endpoint_auth_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "introspection_endpoint_auth_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "introspection_endpoint_auth_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorization_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorization_encryption_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorization_encryption_enc_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claims_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claim_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claims_parameter_supported": {
+            "type": "boolean"
+          },
+          "scopes_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "request_parameter_supported": {
+            "type": "boolean"
+          },
+          "request_uri_parameter_supported": {
+            "type": "boolean"
+          },
+          "require_request_uri_registration": {
+            "type": "boolean"
+          },
+          "code_challenge_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tls_client_certificate_bound_access_tokens": {
+            "type": "boolean"
+          },
+          "revocation_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "revocation_endpoint_auth_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "revocation_endpoint_auth_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "backchannel_logout_supported": {
+            "type": "boolean"
+          },
+          "backchannel_logout_session_supported": {
+            "type": "boolean"
+          },
+          "device_authorization_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "backchannel_token_delivery_modes_supported": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pull",
+                "push",
+                "ping"
+              ]
+            }
+          },
+          "backchannel_authentication_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "backchannel_authentication_request_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "require_pushed_authorization_requests": {
+            "type": "boolean"
+          },
+          "pushed_authorization_request_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          },
+          "mtls_endpoint_aliases": {
+            "type": "object",
+            "properties": {
+              "token_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "revocation_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "introspection_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "device_authorization_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "registration_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "userinfo_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "pushed_authorization_request_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "backchannel_authentication_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              },
+              "webfinger_endpoint": {
+                "type": "string",
+                "example": "https://domain/path"
+              }
+            },
+            "required": [
+              "token_endpoint",
+              "revocation_endpoint",
+              "introspection_endpoint",
+              "device_authorization_endpoint",
+              "registration_endpoint",
+              "userinfo_endpoint",
+              "pushed_authorization_request_endpoint",
+              "backchannel_authentication_endpoint",
+              "webfinger_endpoint"
+            ]
+          },
+          "terms_and_conditions_endpoint": {
+            "type": "string",
+            "example": "https://domain/path"
+          }
+        },
+        "required": [
+          "issuer",
+          "authorization_endpoint",
+          "csc_v1_authorization_endpoint",
+          "token_endpoint",
+          "introspection_endpoint",
+          "userinfo_endpoint",
+          "end_session_endpoint",
+          "jwks_uri",
+          "grant_types_supported",
+          "response_types_supported",
+          "subject_types_supported",
+          "id_token_signing_alg_values_supported",
+          "id_token_encryption_alg_values_supported",
+          "id_token_encryption_enc_values_supported",
+          "userinfo_signing_alg_values_supported",
+          "request_object_signing_alg_values_supported",
+          "request_object_encryption_alg_values_supported",
+          "request_object_encryption_enc_values_supported",
+          "response_modes_supported",
+          "registration_endpoint",
+          "token_endpoint_auth_methods_supported",
+          "token_endpoint_auth_signing_alg_values_supported",
+          "introspection_endpoint_auth_methods_supported",
+          "introspection_endpoint_auth_signing_alg_values_supported",
+          "authorization_signing_alg_values_supported",
+          "authorization_encryption_alg_values_supported",
+          "authorization_encryption_enc_values_supported",
+          "claims_supported",
+          "claim_types_supported",
+          "claims_parameter_supported",
+          "scopes_supported",
+          "request_parameter_supported",
+          "request_uri_parameter_supported",
+          "require_request_uri_registration",
+          "code_challenge_methods_supported",
+          "tls_client_certificate_bound_access_tokens",
+          "revocation_endpoint",
+          "revocation_endpoint_auth_methods_supported",
+          "revocation_endpoint_auth_signing_alg_values_supported",
+          "backchannel_logout_supported",
+          "backchannel_logout_session_supported",
+          "device_authorization_endpoint",
+          "backchannel_token_delivery_modes_supported",
+          "backchannel_authentication_endpoint",
+          "backchannel_authentication_request_signing_alg_values_supported",
+          "require_pushed_authorization_requests",
+          "pushed_authorization_request_endpoint",
+          "mtls_endpoint_aliases",
+          "terms_and_conditions_endpoint"
+        ]
+      },
+      "OauthAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "ident_method_type": {
+            "description": "Defines which ident method should be used. Required for scope ident.",
+            "type": "string",
+            "enum": [
+              "idnow-video",
+              "intrum-video",
+              "intrum-auto",
+              "fidentity",
+              "fidentity_nfc",
+              "fidentity_auto",
+              "ti8m",
+              "nect",
+              "sumsub-video",
+              "sumsub-auto",
+              "pxl-vision"
+            ]
+          },
+          "ident_method_parameters": {
+            "type": "string",
+            "description": "For special cases with TI&M"
+          },
+          "ident_method_delegated_account_id": {
+            "type": "string",
+            "description": "Optional, defines the id of the delegated account to be used."
+          },
+          "ident_method_success_redirect_uri": {
+            "type": "string",
+            "description": "optionally for fidentity ident method, the URI to which the ident provider shall redirect the user after successful ident"
+          },
+          "ident_method_error_redirect_uri": {
+            "type": "string",
+            "description": "optionally for fidentity ident method, the URI to which the ident provider shall redirect the user on error"
+          },
+          "tac_hash_zertes": {
+            "type": "string",
+            "description": "Required for scope ident and jurisdiction ZertES. Valid hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration."
+          },
+          "tac_hash_eidas": {
+            "type": "string",
+            "description": "Required for scope ident and jurisdiction eIDAS. Valid hashes are returned from the terms_and_conditions_endpoint api defined in the Configuration Endpoint."
+          },
+          "tac_language": {
+            "type": "string",
+            "enum": [
+              "DE",
+              "EN",
+              "FR",
+              "IT"
+            ],
+            "description": "Required for scope ident."
+          },
+          "claims_token": {
+            "type": "string",
+            "description": "Required for scope sign. This is a JWT token containing the following claims: <br />credentialID (optional): <i>The credential ID associated with the signing level.</i> Enum values: [<code>OnDemand-Advanced4</code>, <code>OnDemand-Advanced4.1-EU</code>, <code>OnDemand-Qualified4</code>, <code>OnDemand-Qualified4.1-EU</code>] example: <code>OnDemand-Advanced4</code>,<br />documentDigests (optional): <i>Mandatory only when scope = sign. When scope = no_initial_hash, this field must be omitted.</i><br />{<br />hash: <i>hash of the document</i>,<br />label (optional): <i>a label for the document</i><br />},<br />hashAlgorithmOID (optional): <i>Enum values: [<code>2.16.840.1.101.3.4.2.1</code>, <code>2.16.840.1.101.3.4.2.2</code>, <code>2.16.840.1.101.3.4.2.3</code>]</i>,<br />numSignatures (optional): <i>Mandatory only for scope no_initial_hash. Number of documents that will be signed.</i>",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsSUQiOiJPbkRlbWFuZC1BZHZhbmNlZDQiLCJkb2N1bWVudERpZ2VzdHMiOlt7Imhhc2giOiJzVE9nd09tKzQ3NGdGajBxMHgxaVNOc3BLcWJjc2U0SWVpcWxEZy9IV3VJPSIsImxhYmVsIjoiTGVhc2luZyBhZ3JlZW1lbnQgQ29udHJhY3QifV0sImhhc2hBbGdvcml0aG1PSUQiOiIyLjE2Ljg0MC4xLjEwMS4zLjQuMi4xIn0.j3LXU8Q88GAyXZZYSos_b2LsAV_yttRT4WdeunsVOLo"
+          },
+          "login_hint_token": {
+            "type": "string",
+            "description": "This is a JWT token containing the following claims, identifier is optional for scope enroll: identifier (optional): <i>desired authentication identifier</i>,<br />namespace: <i>desired authentication method type</i> Enum values: [<code>msisdn</code>, <code>MSA</code>, <code>STS</code>, <code>MSAINT</code>, <code>FUT</code>, <code>PWDOTP</code>, <code>WBAUTHN</code>],<br />email (optional): <i>email that will be used by MAB to communicate to the user in case of need</i>",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiYmMxMGJjNjktOGMzYy00YmNkLWIwNzktMDY0MWJlOTU0OTU0IiwibmFtZXNwYWNlIjoiU1RTIn0.MsK3vUxzQj-njf_IEbUMkG9PoT_JTbqBGbZQDgkp2Ko"
+          },
+          "scope": {
+            "description": "multiple scopes can be defined using a space separator",
+            "type": "string",
+            "example": "ident sign",
+            "enum": [
+              "sign",
+              "enroll",
+              "auth",
+              "ident",
+              "service",
+              "credential",
+              "tac_provided",
+              "no_initial_hash"
+            ]
+          },
+          "token_delivery_mode": {
+            "default": "pull",
+            "type": "string",
+            "enum": [
+              "pull",
+              "push",
+              "ping"
+            ],
+            "description": "Defines the way the token is delivered to the client: pull means the client has to pull until the result is available, push means that the initiating client is retrieving a callback as soon as the result is ready, for this the callback url has to be defined in the oidc client configuration.",
+            "example": "pull"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "If token_delivery_mode 'push' or 'ping' is selected, this parameter is mandatory and the callback is sent to this url. The url has to be whitelisted in MAB, additional parameters may be added to the url.",
+            "example": "https://signature-application-url/demo"
+          },
+          "client_notification_token": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "If token_delivery_mode 'push' or 'ping' is selected, this parameter is mandatory. Bearer token provided by the client that will be sent back in the header of the callback request for the client to authenticate the callback. The length of the token MUST NOT exceed 1024 characters and it MUST conform to the syntax for Bearer credentials."
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "login_hint_token"
+        ]
+      },
+      "OauthAuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "auth_req_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the auth request id that is needed to get the token via the oauth-token api"
+          },
+          "expires_in": {
+            "type": "number",
+            "description": "The number of seconds for how long the authentication request will be valid."
+          },
+          "interval": {
+            "default": 5,
+            "type": "number"
+          },
+          "mobile_uri": {
+            "type": "string",
+            "description": "on mobile devices use this uri instead of the qr_code"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "the session id of the auth provider"
+          },
+          "qr_code": {
+            "type": "string",
+            "description": "the QR code, in format data:image/png;base64"
+          },
+          "ident_process_id": {
+            "type": "string",
+            "description": "For scope ident, this parameter contains the process id of the ident process"
+          },
+          "ident_process_qr_code": {
+            "type": "string",
+            "description": "For scope ident, this parameter contains the QR code of the ident process. It is the qr code of the ident_process_data content."
+          },
+          "ident_process_data": {
+            "type": "string",
+            "description": "For scope ident, this parameter contains the data of the ident process. For TI&M it is the app deeplink. For sumsub-video it is the websdk access token."
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "e.g. YXEH5C"
+          }
+        },
+        "required": [
+          "auth_req_id",
+          "expires_in",
+          "mobile_uri",
+          "session_id",
+          "qr_code",
+          "transaction_id"
+        ]
+      },
+      "OauthAuthenticationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "RAX_identification_required",
+              "EXT_invalid_authentication_device",
+              "EXT_provider_flow_failed"
+            ]
+          },
+          "error_cause": {
+            "type": "string",
+            "enum": [
+              "RAX_no_evidence_for_user",
+              "RAX_invalid_jurisdiction",
+              "RAX_invalid_consent_serial_number",
+              "MID_revoked_certificate",
+              "MID_invalid_signature",
+              "MID_outstanding_transaction"
+            ]
+          },
+          "error_description": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "e.g. YXEH5C"
+          }
+        },
+        "required": [
+          "error",
+          "transaction_id"
+        ]
+      },
+      "CibaAuthCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          }
+        },
+        "required": [
+          "id_token",
+          "status"
+        ]
+      },
+      "CibaSignCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          }
+        },
+        "required": [
+          "access_token",
+          "id_token",
+          "status"
+        ]
+      },
+      "CibaNoInitialHashCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "This field holds an intermediate access token, which must be exchanged for a SAD through the Token API using grant_type=token-exchange. See the token operation for more information."
+          },
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          }
+        },
+        "required": [
+          "access_token",
+          "id_token",
+          "status"
+        ]
+      },
+      "CibaEnrollCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          }
+        },
+        "required": [
+          "id_token",
+          "status"
+        ]
+      },
+      "CibaErrorCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "auth_req_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the auth request id that is needed to get the token via the oauth-token api"
+          },
+          "error": {
+            "type": "string",
+            "enum": [
+              "expired_token",
+              "access_denied",
+              "authorization_pending",
+              "RAX_identification_required"
+            ]
+          },
+          "error_cause": {
+            "type": "string",
+            "enum": [
+              "RAX_no_evidence_for_user",
+              "RAX_invalid_jurisdiction",
+              "RAX_invalid_consent_serial_number"
+            ]
+          },
+          "error_description": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "e.g. YXEH5C"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "error"
+            ]
+          }
+        },
+        "required": [
+          "auth_req_id",
+          "error",
+          "transaction_id",
+          "status"
+        ]
+      },
+      "OauthTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "urn:openid:params:grant-type:ciba"
+            ],
+            "example": "urn:openid:params:grant-type:ciba"
+          },
+          "auth_req_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the auth_req_id value returned by the previous oauth-authorize call",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "grant_type",
+          "auth_req_id"
+        ]
+      },
+      "OauthTokenSignResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          }
+        },
+        "required": [
+          "access_token",
+          "id_token"
+        ]
+      },
+      "OauthTokenEnrollResponse": {
+        "type": "object",
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          }
+        },
+        "required": [
+          "id_token"
+        ]
+      },
+      "OauthTokenAuthResponse": {
+        "type": "object",
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "description": "contains the following claims: <br />exp: <i>token expiration date</i>,<br />iat: <i>time of token generation</i>,<br />iss: <i>issuer</i>,<br />aud: <i>oidc client id</i>,<br />sub: <i>user id</i>,<br />device_id: <i>device id</i>,<br />transaction_id: <i>transaction id</i>,<br />auth_req_id (optional): <i>auth_req_id</i>,<br />state (optional): <i>initial request state</i>,<br />namespace: <i>evidence namespace</i>"
+          }
+        },
+        "required": [
+          "id_token"
+        ]
+      },
+      "OauthTokenErrorResponse": {
+        "type": "object",
+        "properties": {
+          "auth_req_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the auth request id that is needed to get the token via the oauth-token api"
+          },
+          "error": {
+            "type": "string",
+            "enum": [
+              "expired_token",
+              "access_denied",
+              "authorization_pending",
+              "RAX_identification_required"
+            ]
+          },
+          "error_cause": {
+            "type": "string",
+            "enum": [
+              "RAX_no_evidence_for_user",
+              "RAX_invalid_jurisdiction",
+              "RAX_invalid_consent_serial_number"
+            ]
+          },
+          "error_description": {
+            "type": "string"
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "e.g. YXEH5C"
+          }
+        },
+        "required": [
+          "auth_req_id",
+          "error",
+          "transaction_id"
+        ]
+      },
+      "PingCallbackPayload": {
+        "type": "object",
+        "properties": {
+          "auth_req_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the auth request id that is needed to get the token via the oauth-token api"
+          }
+        },
+        "required": [
+          "auth_req_id"
+        ]
+      },
+      "AuthorizationCodeTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "authorization_code"
+            ]
+          },
+          "code": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Mandatory for CSC: The URL where the user was redirected after the\nauthorization process completed. It is used to validate\nthat it matches the original value previously passed to the\nauthorization server. This SHALL be used only if the\nredirect_uri parameter was included in the authorization\nrequest, and their values SHALL be identical."
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "grant_type",
+          "code"
+        ]
+      },
+      "RefreshCodeTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "refresh_token"
+            ]
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "grant_type",
+          "refresh_token"
+        ]
+      },
+      "ClientCredentialsTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "client_credentials"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "description": "The scope, multiple scopes can be defined using a space separator",
+            "example": "sign",
+            "enum": [
+              "sign",
+              "enroll",
+              "auth",
+              "ident",
+              "service",
+              "credential",
+              "tac_provided",
+              "no_initial_hash"
+            ]
+          },
+          "credentialID": {
+            "type": "string",
+            "example": "OnDemand-Advanced4",
+            "enum": [
+              "OnDemand-Advanced4",
+              "OnDemand-Advanced4.1-EU",
+              "OnDemand-Qualified4",
+              "OnDemand-Qualified4.1-EU"
+            ]
+          },
+          "seal_name": {
+            "type": "string",
+            "description": "optional value. Must be provided for signing with seal (static values for the claims credentialID field)"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "grant_type",
+          "scope"
+        ]
+      },
+      "RevokeTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team"
+          },
+          "token": {
+            "type": "string",
+            "description": "The token to revoke, this can either be an access or refresh token. If the token passed to the request is a refresh_token, then the authorization server invalidates the refresh token and all access tokens based on the same authorization grant. If the token passed to the request is an access_token, then the authorization server invalidates just the access token."
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "token"
+        ]
+      },
+      "ExchangeTokenRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "grant_type": {
+            "type": "string",
+            "enum": [
+              "urn:ietf:params:oauth:grant-type:token-exchange"
+            ]
+          },
+          "subject_token": {
+            "type": "string",
+            "description": "A security token that represents the identity of the party on behalf of whom the request is being made. Typically, the subject of this token will be the subject of the security token issued in response to the request."
+          },
+          "subject_token_type": {
+            "type": "string",
+            "description": "An identifier that indicates the type of the security token in the subject_token parameter.",
+            "example": "urn:ietf:params:oauth:token-type:access_token"
+          },
+          "requested_token_type": {
+            "type": "string",
+            "description": "An identifier that indicates the type of the security token requested. If this parameter is not present, the authorization server MAY issue an access token or a security token of another type, at its discretion.",
+            "example": "urn:ietf:params:oauth:token-type:sad_token"
+          },
+          "structured_scope": {
+            "type": "string",
+            "description": "The content of the structured_scope claim of the the new token in URL encoded - Base64 encoded JSON.\nTo be handled as PATCH (only claims/subclaims mentioned are updated, others stay as they are in the previous token).\nExample content: {\"sign\":{\"documentDigests\":[{\"hash\":\"sTOgwOm+474gFj0q0x1iSNspKqbcse4IeiqlDg/HWuI2\"}]}}",
+            "example": "eyJzaWduIjp7ImRvY3VtZW50RGlnZXN0cyI6W3siaGFzaCI6InNUT2d3T20rNDc0Z0ZqMHEweDFpU05zcEtxYmNzZTRJZWlxbERnL0hXdUkyIn1dfX0="
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "grant_type",
+          "subject_token",
+          "subject_token_type",
+          "structured_scope"
+        ]
+      },
+      "CreateParRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client identifier UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The client secret UUID provided by the support team",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "the url to which the application will redirect back after processing",
+            "example": "https://CUSTOMER_redirect_uri"
+          },
+          "login_hint": {
+            "type": "object",
+            "properties": {
+              "identifier": {
+                "type": "string",
+                "description": "desired authentication identifier"
+              },
+              "namespace": {
+                "description": "desired authentication method type",
+                "type": "string",
+                "enum": [
+                  "msisdn",
+                  "MSA",
+                  "STS",
+                  "MSAINT",
+                  "FUT",
+                  "PWDOTP",
+                  "WBAUTHN"
+                ]
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "email that will be used by MAB to communicate to the user in case of need"
+              }
+            },
+            "required": [
+              "namespace"
+            ],
+            "description": "Used to preselected the authentication method (namespace) for the user. If not provided, an auth method selection page is shown to the user."
+          },
+          "state": {
+            "type": "string",
+            "description": "optional value. The state parameter to correlate the original request and response, it will be added as the 'state' parameter in the redirect back call"
+          },
+          "client_session_id": {
+            "type": "string",
+            "description": "optional value that will can be be used to show a custom state to show to the user in the screens"
+          },
+          "scope": {
+            "description": "multiple scopes can be defined using a space separator",
+            "type": "string",
+            "example": "ident sign",
+            "enum": [
+              "sign",
+              "enroll",
+              "auth",
+              "ident",
+              "service",
+              "credential",
+              "tac_provided",
+              "no_initial_hash"
+            ]
+          },
+          "claims": {
+            "type": "object",
+            "properties": {
+              "credentialID": {
+                "type": "string",
+                "description": "The credential ID associated with the signing level.",
+                "example": "OnDemand-Advanced4",
+                "enum": [
+                  "OnDemand-Advanced4",
+                  "OnDemand-Advanced4.1-EU",
+                  "OnDemand-Qualified4",
+                  "OnDemand-Qualified4.1-EU"
+                ]
+              },
+              "documentDigests": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "hash": {
+                      "type": "string",
+                      "description": "hash of the document"
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "a label for the document"
+                    }
+                  },
+                  "required": [
+                    "hash"
+                  ],
+                  "description": "Mandatory only when scope = sign. When scope = no_initial_hash, this field must be omitted."
+                },
+                "maxItems": null
+              },
+              "hashAlgorithmOID": {
+                "type": "string",
+                "enum": [
+                  "2.16.840.1.101.3.4.2.1",
+                  "2.16.840.1.101.3.4.2.2",
+                  "2.16.840.1.101.3.4.2.3"
+                ]
+              },
+              "numSignatures": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": null,
+                "description": "Mandatory only for scope no_initial_hash. Number of documents that will be signed."
+              }
+            }
+          },
+          "ident_methods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "idnow-video",
+                    "intrum-video",
+                    "intrum-auto",
+                    "fidentity",
+                    "fidentity_nfc",
+                    "fidentity_auto",
+                    "ti8m",
+                    "nect",
+                    "sumsub-video",
+                    "sumsub-auto",
+                    "pxl-vision"
+                  ]
+                },
+                "delegated_account_id": {
+                  "type": "string",
+                  "description": "If a customer specific ident method account shall be used, the corresponding uuid has to be defined here. The uuid is provided by the support team."
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "description": "defines which ident methods should be shown to the user to chose, if only 1 is defined the selection is skipped"
+          },
+          "user_email": {
+            "type": "string",
+            "format": "email",
+            "description": "if passed the email will be used to communicate with the client if needed"
+          },
+          "terms_and_conditions": {
+            "type": "object",
+            "properties": {
+              "hash_zertes": {
+                "type": "string",
+                "description": "Valid hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration."
+              },
+              "hash_eidas": {
+                "type": "string",
+                "description": "Valid hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration."
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "DE",
+                  "EN",
+                  "FR",
+                  "IT"
+                ]
+              }
+            },
+            "required": [
+              "hash_zertes",
+              "hash_eidas",
+              "language"
+            ],
+            "description": "optional value. If passed the t&c will considered as approved. Hence the t&c screen will no not be shown. Valid hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration"
+          },
+          "seal_name": {
+            "type": "string",
+            "description": "optional value. Must be provided for signing with seal (static values for the claims credentialID field)"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "redirect_uri"
+        ]
+      },
+      "ParResponse": {
+        "type": "object",
+        "properties": {
+          "expires_in": {
+            "type": "number",
+            "description": "the validity of the par request",
+            "example": 3600
+          },
+          "request_uri": {
+            "type": "string",
+            "description": "the request_uri that shall be used in the authentication call",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "required": [
+          "expires_in",
+          "request_uri"
+        ]
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string"
+          },
+          "session_state": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "sign",
+              "enroll",
+              "auth",
+              "ident",
+              "service",
+              "credential",
+              "tac_provided",
+              "no_initial_hash"
+            ]
+          },
+          "consent_serial_number": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_token",
+          "expires_in",
+          "token_type",
+          "session_state",
+          "scope",
+          "consent_serial_number"
+        ]
+      },
+      "WebfingerResponse": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "example": "urn:mab:acct:41791234567:msisdn"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "urn:mab:sign:eligible": "true",
+              "urn:mab:sign:platform": "MID"
+            }
+          }
+        },
+        "required": [
+          "subject",
+          "properties"
+        ]
+      },
+      "VerifyOtpRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "otp": {
+            "type": "string",
+            "example": "123321"
+          },
+          "resend": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": true
+          },
+          "auth_req_id": {
+            "type": "string",
+            "example": "auth123req"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "auth_req_id"
+        ]
+      },
+      "VerifyPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "client_secret": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "password": {
+            "type": "string",
+            "example": "yourPassowrd123"
+          },
+          "auth_req_id": {
+            "type": "string",
+            "example": "auth123req"
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "password",
+          "auth_req_id"
+        ]
+      },
+      "VerifyOtpResponse": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "authenticated": {
+                "type": "boolean",
+                "description": "Indicates if the OTP verification was successful."
+              }
+            },
+            "required": [
+              "authenticated"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "reSendingAllowed": {
+                "type": "number",
+                "description": "Number of remaining OTP resend attempts."
+              }
+            },
+            "required": [
+              "reSendingAllowed"
+            ]
+          }
+        ],
+        "description": "Response schema for OTP verification."
+      },
+      "VerifyPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "description": "Indicates if the OTP verification was successful."
+          }
+        },
+        "required": [
+          "authenticated"
+        ]
+      }
+    },
+    "examples": {
+      "PwdOtpParRequestExample": {
+        "summary": "This is an example of the PAR request with the password and OTP/SMS authentication method (\"PWDOTP\" namespace).",
+        "value": {
+          "client_id": "00000000-0000-0000-0000-000000000000",
+          "client_secret": "00000000-0000-0000-0000-000000000000",
+          "login_hint": {
+            "namespace": "PWDOTP"
+          },
+          "scope": "sign ident",
+          "ident_methods": [
+            {
+              "type": "sumsub-video"
+            }
+          ],
+          "client_session_id": "to_replace_by_client_session_id",
+          "redirect_uri": "https://CUSTOMER_redirect_uri",
+          "claims": {
+            "credentialID": "OnDemand-Advanced4",
+            "documentDigests": [
+              {
+                "hash": "sTOgwOm+474gFj0q0x1iSNspKqbcse4IeiqlDg/HWuI=",
+                "label": "Leasing agreement Contract 1"
+              }
+            ],
+            "hashAlgorithmOID": "2.16.840.1.101.3.4.2.1"
+          }
+        }
+      },
+      "MobileIdParRequestExample": {
+        "summary": "This is an example of the PAR request with MobileID authentication method (namespace \"msisdn)\".",
+        "value": {
+          "client_id": "00000000-0000-0000-0000-000000000000",
+          "client_secret": "00000000-0000-0000-0000-000000000000",
+          "login_hint": {
+            "namespace": "msisdn"
+          },
+          "scope": "sign ident",
+          "ident_methods": [
+            {
+              "type": "sumsub-video"
+            }
+          ],
+          "client_session_id": "to_replace_by_client_session_id",
+          "redirect_uri": "https://CUSTOMER_redirect_uri",
+          "claims": {
+            "credentialID": "OnDemand-Advanced4",
+            "documentDigests": [
+              {
+                "hash": "sTOgwOm+474gFj0q0x1iSNspKqbcse4IeiqlDg/HWuI=",
+                "label": "Leasing agreement Contract 1"
+              }
+            ],
+            "hashAlgorithmOID": "2.16.840.1.101.3.4.2.1"
+          }
+        }
+      },
+      "TacProvidedRequestExample": {
+        "summary": "This is an example of the PAR request with terms and conditions provided by the client (\"tac_provided\" scope).",
+        "value": {
+          "client_id": "00000000-0000-0000-0000-000000000000",
+          "client_secret": "00000000-0000-0000-0000-000000000000",
+          "login_hint": {
+            "namespace": "WBAUTHN"
+          },
+          "scope": "sign ident",
+          "client_session_id": "to_replace_by_client_session_id",
+          "redirect_uri": "https://CUSTOMER_redirect_uri",
+          "claims": {
+            "credentialID": "OnDemand-Advanced4",
+            "documentDigests": [
+              {
+                "hash": "sTOgwOm+474gFj0q0x1iSNspKqbcse4IeiqlDg/HWuI=",
+                "label": "Leasing agreement Contract 1"
+              }
+            ],
+            "hashAlgorithmOID": "2.16.840.1.101.3.4.2.1"
+          },
+          "terms_and_conditions": {
+            "hash_zertes": "to replace by valid hash for zertes. Hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration",
+            "hash_eidas": "to replace by valid hash for eidas. Hashes are returned from the terms_and_conditions_endpoint api defined in the /api/auth/realms/broker/.well-known/openid-configuration",
+            "language": "EN"
+          }
+        }
+      },
+      "CertsResponseExample": {
+        "summary": "example",
+        "value": {
+          "alg": "RS256",
+          "e": "AQAB",
+          "kid": "NjVBRjY5MDlCMUIwNzU4RTA2QzZFMDQ4QzQ2MDAyQjVDNjk1RTM2Qg",
+          "kty": "RSA",
+          "n": "yeNlzlub94YgerT030codqEztjfU_S6X4DbDA_iVKkjAWtYfPHDzz_sPCT1Axz6isZdf3lHpq_gYX4Sz-cbe4rjmigxUxr-FgKHQy3HeCdK6hNq9ASQvMK9LBOpXDNn7mei6RZWom4wo3CMvvsY1w8tjtfLb-yQwJPltHxShZq5-ihC9irpLI9xEBTgG12q5lGIFPhTl_7inA1PFK97LuSLnTJzW0bj096v_TMDg7pOWm_zHtF53qbVsI0e3v5nmdKXdFf9BjIARRfVrbxVxiZHjU6zL6jY5QJdh1QCmENoejj_ytspMmGW7yMRxzUqgxcAqOBpVm0b-_mW3HoBdjQ",
+          "use": "sig"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/realms/broker/.well-known/openid-configuration": {
+      "get": {
+        "summary": "OpenId Configuration",
+        "description": "The OpenID Configuration API provides metadata about an OpenID Connect provider, including URLs for authorization, token, and user info endpoints, supported scopes, grant types, and public key details. It simplifies client integration by automating discovery.",
+        "operationId": "openIdConfiguration",
+        "tags": [
+          "oidc"
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenIdConfiguration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth.trustservices.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/certs": {
+      "get": {
+        "summary": "Certificate Configuration",
+        "description": "The OpenID Certs API provides the public JSON Web Key Set (JWKS) used to verify JSON Web Tokens (JWTs) issued by the OpenID provider. It ensures secure token validation for client applications.",
+        "operationId": "certs",
+        "tags": [
+          "oidc"
+        ],
+        "responses": {
+          "200": {
+            "description": "cert json",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "$ref": "#/components/examples/CertsResponseExample"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth.trustservices.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/auth/realms/broker/protocol/openid-connect/auth": {
+      "get": {
+        "summary": "Authorization",
+        "description": "The starting point for the browser-based ETSI authorization flow.",
+        "operationId": "auth",
+        "tags": [
+          "oidc"
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "The client identifier UUID provided by the support team",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          {
+            "name": "request_uri",
+            "in": "query",
+            "description": "Optional, the code obtained from the previous PAR request.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "The redirect url. This parameter is only used if not defined in the PAR request.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "The scope, multiple scopes can be defined using a space separator. This parameter is only used if not defined in the PAR request. Valid scopes are sign,enroll,auth,ident",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ident sign"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "The state parameter to correlate the original request and response. This parameter is only used if not defined in the PAR request.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nonce",
+            "in": "query",
+            "description": "The nonce value is added to the access token (UUID).",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "claims",
+            "in": "query",
+            "description": "URL encoded claims. This parameter is only used if not defined in the PAR request.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "%7BcredentialID%3A%22OnDemand-Advanced4%22%2C%20documentDigests%3A%5B%7Bhash%3A%22sTOgwOm%2B474gFj0q0x1iSNspKqbcse4IeiqlDg%2FHWuI%3D%22%2C%20label%3A%22Leasing%20agreement%20Contract%22%7D%20%5D%2ChashAlgorithmOID%3A%222.16.840.1.101.3.4.2.1%22%7D"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth.trustservices.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/auth/realms/broker/protocol/openid-connect/csc/v1/auth": {
+      "get": {
+        "summary": "CSC Authorization",
+        "description": "The starting point for the browser-based CSC authorization flow.",
+        "operationId": "csc_auth_v1",
+        "tags": [
+          "oidc"
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "The client identifier UUID provided by the support team",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "The redirect url.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "description": "The scope. Valid scopes are service,credential",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "service"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "The state parameter to correlate the original request and response.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nonce",
+            "in": "query",
+            "description": "The nonce value is added to the access token (UUID).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "description": "The response type.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "code",
+              "enum": [
+                "code",
+                "token",
+                "none"
+              ]
+            }
+          },
+          {
+            "name": "credentialID",
+            "in": "query",
+            "description": "The credential Id. Mandatory for scope credential.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OnDemand-Advanced4",
+                "OnDemand-Advanced4.1-EU",
+                "OnDemand-Qualified4",
+                "OnDemand-Qualified4.1-EU"
+              ]
+            },
+            "example": "OnDemand-Advanced4"
+          },
+          {
+            "name": "numSignatures",
+            "in": "query",
+            "description": "The number of signatures. Mandatory for scope credential.",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 60
+            }
+          },
+          {
+            "name": "hash",
+            "in": "query",
+            "description": "The document hashes separated by comma. Only supported for scope credential.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account_token",
+            "in": "query",
+            "description": "The account token, containing information about the signature application and signed with the sha256 hash of the client_secret UUID provided by the support team.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth.trustservices.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/ext/par/request": {
+      "post": {
+        "summary": "PAR",
+        "description": "THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> The Pushed Authorization Request (PAR) is specification that allows to secure the OIDC authorization flow. Instead of providing most of the parameter in the authorization url, the PAR request allows to pass these parameters via a back-channel call secured with mTLS. The login_hint parameter can be passed to this interface, so that nobody can change its payload or value in the authorization call. The following generic curl request below show what kind of parameters can be passed to the PAR request",
+        "operationId": "par",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateParRequest"
+              },
+              "examples": {
+                "PWD-OTP/SMS support": {
+                  "$ref": "#/components/examples/PwdOtpParRequestExample"
+                },
+                "MobileID Support": {
+                  "$ref": "#/components/examples/MobileIdParRequestExample"
+                },
+                "Terms and Conditions provided": {
+                  "$ref": "#/components/examples/TacProvidedRequestExample"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/token": {
+      "post": {
+        "summary": "Token",
+        "description": "FOR NON-CSC FLOWS, THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> Returns the SAD token, that can be used to sign the document. Based on the clients configuration it also returns a refresh token that can be used to refresh to SAD token.",
+        "operationId": "token",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthorizationCodeTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ClientCredentialsTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshCodeTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ExchangeTokenRequest"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "grant_type"
+                }
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthorizationCodeTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ClientCredentialsTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshCodeTokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ExchangeTokenRequest"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "grant_type"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/oauth-authorize": {
+      "post": {
+        "summary": "CIBA Authentication",
+        "description": "THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> CIBA allows a signature application to start an electronic signature with a back-channel call instead of a browser based flow.",
+        "operationId": "cibaAuth",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/OauthAuthenticationRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Accept-Language",
+            "required": false,
+            "schema": {
+              "enum": [
+                "de",
+                "en",
+                "fr",
+                "it"
+              ],
+              "default": "en"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthAuthenticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthAuthenticationErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "callbacks": {
+          "authPush": {
+            "{$request.body#/callback_url}": {
+              "post": {
+                "summary": "Push callback triggered after processing of request with scope auth",
+                "description": "This callback is executed via POST request to the URL specified in the OIDC client configuration.\n",
+                "requestBody": {
+                  "description": "Payload for the callback request",
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/CibaAuthCallbackPayload"
+                          },
+                          {
+                            "$ref": "#/components/schemas/CibaErrorCallbackPayload"
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "status"
+                        }
+                      }
+                    }
+                  }
+                },
+                "security": [
+                  {
+                    "ClientNotificationToken": []
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Callback successful"
+                  },
+                  "400": {
+                    "description": "Bad request in callback"
+                  },
+                  "500": {
+                    "description": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          },
+          "signPush": {
+            "{$request.body#/callback_url}": {
+              "post": {
+                "summary": "Push callback triggered after processing of request with scope sign",
+                "description": "This callback is executed via POST request to the URL specified in the OIDC client configuration.\n",
+                "requestBody": {
+                  "description": "Payload for the callback request",
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/CibaSignCallbackPayload"
+                          },
+                          {
+                            "$ref": "#/components/schemas/CibaErrorCallbackPayload"
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "status"
+                        }
+                      }
+                    }
+                  }
+                },
+                "security": [
+                  {
+                    "ClientNotificationToken": []
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Callback successful"
+                  },
+                  "400": {
+                    "description": "Bad request in callback"
+                  },
+                  "500": {
+                    "description": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          },
+          "noInitialHashPush": {
+            "{$request.body#/callback_url}": {
+              "post": {
+                "summary": "Push callback triggered after processing of request with scope sign and no_initial_hash",
+                "description": "This callback is executed via POST request to the URL specified in the OIDC client configuration.\n",
+                "requestBody": {
+                  "description": "Payload for the callback request",
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/CibaNoInitialHashCallbackPayload"
+                          },
+                          {
+                            "$ref": "#/components/schemas/CibaErrorCallbackPayload"
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "status"
+                        }
+                      }
+                    }
+                  }
+                },
+                "security": [
+                  {
+                    "ClientNotificationToken": []
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Callback successful"
+                  },
+                  "400": {
+                    "description": "Bad request in callback"
+                  },
+                  "500": {
+                    "description": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          },
+          "enrollPush": {
+            "{$request.body#/callback_url}": {
+              "post": {
+                "summary": "Push callback triggered after processing of request with scope enroll",
+                "description": "This callback is executed via POST request to the URL specified in the OIDC client configuration.\n",
+                "requestBody": {
+                  "description": "Payload for the callback request",
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/CibaEnrollCallbackPayload"
+                          },
+                          {
+                            "$ref": "#/components/schemas/CibaErrorCallbackPayload"
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "status"
+                        }
+                      }
+                    }
+                  }
+                },
+                "security": [
+                  {
+                    "ClientNotificationToken": []
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Callback successful"
+                  },
+                  "400": {
+                    "description": "Bad request in callback"
+                  },
+                  "500": {
+                    "description": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          },
+          "ping": {
+            "{$request.body#/callback_url}": {
+              "post": {
+                "summary": "Ping callback triggered after processing of request",
+                "description": "This callback is executed via POST request to the URL specified in the OIDC client configuration.\n",
+                "requestBody": {
+                  "description": "Payload for the callback request",
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/PingCallbackPayload"
+                      }
+                    }
+                  }
+                },
+                "security": [
+                  {
+                    "ClientNotificationToken": []
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Callback successful"
+                  },
+                  "400": {
+                    "description": "Bad request in callback"
+                  },
+                  "500": {
+                    "description": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/oauth-token": {
+      "post": {
+        "summary": "CIBA Token",
+        "description": "THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> Polling method that returns the result, if the result is not yet ready it returns an authorization_pending error code",
+        "operationId": "cibaToken",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/OauthTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/OauthTokenSignResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OauthTokenAuthResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OauthTokenEnrollResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthTokenErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/protocol/openid-connect/revoke": {
+      "post": {
+        "summary": "Revoke Token",
+        "description": "THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> Revokes a previously created token",
+        "operationId": "revokeToken",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "no content"
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/auth/realms/broker/.well-known/webfinger": {
+      "get": {
+        "summary": "Webfinger",
+        "description": "THIS API IS PROTECTED BY MTLS, THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.\n\n\nWebfinger to discover information about resources. In particular, it is used to check if a user is eligible to sign a document using a given credentialID.\n\nIf the resource is not existing, expect a 404 response.\n\nThe following table describes the different serial mismatch scenarios. For more information, please refer to the [serial mismatch](https://trustservices.swisscom.com/en/support/help-center/what-does-serial-number-mismatch-mean):\n\n| Status Code | Description |\n|-------------|-------------|\n| `MISMATCH_SAS_BUT_MID` | You have activated MID after you were registered with PWD OTP |\n| `MISMATCH_SAS_CHANGE_SN` | You have changed your Password after your Identification |\n| `MISMATCH_MID` | You have re-activated MID without recovery code after you were registered with MID |\n",
+        "operationId": "webfinger",
+        "tags": [
+          "oidc"
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "The client identifier UUID provided by the support team",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          {
+            "name": "client_secret",
+            "in": "query",
+            "description": "The client secret UUID provided by the support team",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "description": "resource identifier, format urn:mab:acct:identifier:namespace",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "urn:mab:acct:41791234567:msisdn"
+          },
+          {
+            "name": "credentialID",
+            "in": "query",
+            "description": "credentialID for which we want to check eligibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "OnDemand-Advanced4, OnDemand-Advanced4.1-EU, OnDemand-Qualified4, OnDemand-Qualified4.1-EU"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/jrd+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebfingerResponse"
+                },
+                "examples": {
+                  "With CredentialID and namespace msisdn": {
+                    "summary": "With `credentialID` for `msisdn` namespace, the resulting platform can be either `MID` or `SAS`. The platform property is `msisdn` namespace specific only.",
+                    "value": {
+                      "subject": "urn:mab:acct:41791234567:msisdn",
+                      "properties": {
+                        "urn:mab:sign:eligible": "true",
+                        "urn:mab:sign:platform": "MID"
+                      }
+                    }
+                  },
+                  "With CredentialID and other namespaces": {
+                    "summary": "With provided `credentialID` for all namespaces except `msisdn`. Keep in mind, there is no platform property.",
+                    "value": {
+                      "subject": "urn:mab:acct:3551b4e4-cff0-41df-bde9-8f9cef975938:WBAUTHN",
+                      "properties": {
+                        "urn:mab:sign:eligible": "true"
+                      }
+                    }
+                  },
+                  "Evidence validity is less than 90 days": {
+                    "summary": "All namespaces with a `credentialID` will include the evidence expiry date when the validity is less than 90 days.",
+                    "value": {
+                      "subject": "urn:mab:acct:3551b4e4-cff0-41df-bde9-8f9cef975938:WBAUTHN",
+                      "properties": {
+                        "urn:mab:sign:eligible": "true",
+                        "urn:mab:sign:evidenceExpiryDate": "2024-04-10"
+                      }
+                    }
+                  },
+                  "Without credentialID and namespace msisdn": {
+                    "summary": "Without provided `credentialID` for `msisdn` namespace. There is no `eligible` property.",
+                    "value": {
+                      "subject": "urn:mab:acct:41791234567:msisdn",
+                      "properties": {
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4.1-EU": "false",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4.1-EU": "false",
+                        "urn:mab:sign:credentialID:static-qualified4-ch": "true",
+                        "urn:mab:sign:credentialID:static-qualified4.1-eu": "false",
+                        "urn:mab:sign:credentialID:static-saphir4-ch": "true",
+                        "urn:mab:sign:credentialID:static-saphir4.1-eu": "false",
+                        "urn:mab:sign:platform": "MID"
+                      }
+                    }
+                  },
+                  "Without credentialID, all namespaces except msisdn": {
+                    "summary": "Without provided `credentialID` for all namespaces except `msisdn`. There is no `eligible` property.",
+                    "value": {
+                      "subject": "urn:mab:acct:3551b4e4-cff0-41df-bde9-8f9cef975938:WBAUTHN",
+                      "properties": {
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4.1-EU": "false",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4.1-EU": "false",
+                        "urn:mab:sign:credentialID:static-qualified4-ch": "true",
+                        "urn:mab:sign:credentialID:static-qualified4.1-eu": "false",
+                        "urn:mab:sign:credentialID:static-saphir4-ch": "true",
+                        "urn:mab:sign:credentialID:static-saphir4.1-eu": "false"
+                      }
+                    }
+                  },
+                  "Without credentialID, all namespaces except msisdn, and expiration date": {
+                    "summary": "Without provided `credentialID` for all namespaces except `msisdn`, when the evidence validity is less than 90 days.",
+                    "value": {
+                      "subject": "urn:mab:acct:3551b4e4-cff0-41df-bde9-8f9cef975938:WBAUTHN",
+                      "properties": {
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Advanced4.1-EU": "false",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4": "true",
+                        "urn:mab:sign:credentialID:OnDemand-Qualified4.1-EU": "false",
+                        "urn:mab:sign:credentialID:static-qualified4-ch": "true",
+                        "urn:mab:sign:credentialID:static-qualified4.1-eu": "false",
+                        "urn:mab:sign:credentialID:static-saphir4-ch": "true",
+                        "urn:mab:sign:credentialID:static-saphir4.1-eu": "false",
+                        "urn:mab:sign:evidenceExpiryDate": "2024-04-10"
+                      }
+                    }
+                  },
+                  "Serial mismatch cases": {
+                    "summary": "Serial mismatch cases can be one of `MISMATCH_SAS_BUT_MID`, `MISMATCH_SAS_CHANGE_SN`, `MISMATCH_MID` - see description for more details.",
+                    "value": {
+                      "subject": "urn:mab:acct:41791234567:msisdn",
+                      "properties": {
+                        "urn:mab:sign:eligible": "false",
+                        "urn:mab:sign:status": "MISMATCH_SAS_BUT_MID"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/pwd-otp-auth/verify-otp": {
+      "post": {
+        "summary": "OTP Authentication",
+        "description": "THIS API IS PROTECTED BY MTLS. THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> This endpoint handles OTP (One-Time Password) validation and resending for a client-initiated backchannel authentication flow. It is required as second step for Qualified signatures (after password is provided via /api/pwd-otp-auth/verify-pwd) and as first step for Advanced signatures.<br /><br /> Provide either 'otp' for authentication or 'resend' to resend the OTP SMS (mutually exclusive). Users can resend the OTP up to 3 times. If too many wrong OTPs are submitted (5 attempts), the session is declined. OTP codes expire after 8 minutes from when they were sent. Resending is subject to a 120-second cooldown.\n",
+        "operationId": "otpAuth",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOtpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully handled OTP request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyOtpResponse",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean",
+                      "description": "Indicates if the user is authenticated."
+                    },
+                    "reSendingAllowed": {
+                      "type": "integer",
+                      "description": "Number of remaining OTP resend attempts. User is only allowed to re-send code 3 times."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid input or conditions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access due to invalid client credentials."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    },
+    "/api/pwd-otp-auth/verify-pwd": {
+      "post": {
+        "summary": "Password Authentication",
+        "description": "THIS API IS PROTECTED BY MTLS. THE CORRESPONDING CERTIFICATE IS PROVIDED BY THE SUPPORT TEAM.<br /><br /> This endpoint validates the user's password for qualified signatures. On success, an OTP is sent to the user's phone number and the client must proceed with /api/pwd-otp-auth/verify-otp to complete the flow.\n",
+        "operationId": "pwdAuth",
+        "tags": [
+          "oidc"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful and OTP sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyPasswordResponse",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request due to client errors such as validation failures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method Not Allowed, if the method is not POST."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://auth-trustservices.mtls-scapp.swisscom.com"
+          }
+        ]
+      }
+    }
+  }
+}
