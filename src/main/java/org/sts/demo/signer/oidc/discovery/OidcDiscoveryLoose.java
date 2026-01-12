@@ -1,4 +1,4 @@
-package org.sts.demo.signer.oidc.model;
+package org.sts.demo.signer.oidc.discovery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

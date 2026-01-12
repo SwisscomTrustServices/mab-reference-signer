@@ -8,7 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.sts.demo.signer.config.QtspProperties;
-import org.sts.demo.signer.oidc.model.OidcDiscoveryLoose;
 
 import java.net.URI;
 import java.time.Duration;

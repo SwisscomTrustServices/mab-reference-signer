@@ -15,8 +15,8 @@ import reactor.netty.http.client.HttpClient;
 
 import java.io.File;
 
-import static org.sts.demo.signer.crypto.NettySslContexts.mtlsClientTls12;
-import static org.sts.demo.signer.crypto.PemMaterialLoader.toTempFile;
+import static org.sts.demo.signer.config.mtls.NettySslContexts.mtlsClientTls12;
+import static org.sts.demo.signer.config.mtls.PemMaterialLoader.toTempFile;
 
 @Configuration
 public class QtspMtlsHttpConfig {

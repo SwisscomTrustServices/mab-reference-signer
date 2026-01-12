@@ -30,6 +30,7 @@ dependencies {
         exclude group: "commons-logging", module: "commons-logging"
     }
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation platform('org.junit:junit-bom:5.10.0')

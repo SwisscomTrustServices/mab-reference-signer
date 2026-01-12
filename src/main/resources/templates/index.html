@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Demo Signer</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; max-width: 980px; }
+        .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+        label { display:block; margin:.6rem 0 .2rem; font-weight: 600; }
+        button { padding: .6rem 1rem; cursor: pointer; }
+        input[type="text"] { padding: .55rem .7rem; border: 1px solid #e5e7eb; border-radius: 10px; }
+        input[type="file"] { padding: .4rem 0; }
+        pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
+        .row { display:flex; gap:1rem; align-items:center; flex-wrap: wrap; }
+        .muted { color:#666; }
+        .ok { color: #0a7a2f; }
+        .err { color: #b42318; }
+        .w520 { width: 520px; max-width: 100%; }
+        .small { font-size: .9rem; }
+    </style>
+</head>
+<body>
+<h1>Demo Signer</h1>
+<p class="muted">Upload a PDF, create a PAR request, authenticate at QTSP, then paste the returned <code>code</code> to exchange for tokens.</p>
+
+<div class="card">
+    <h3>1) Create PAR</h3>
+
+    <form id="parForm">
+        <label for="pdf">PDF</label>
+        <input id="pdf" name="pdf" type="file" accept="application/pdf" required />
+
+        <div class="row" style="margin-top:1rem;">
+            <button type="submit" id="parBtn">Create PAR</button>
+            <span id="parStatus" class="muted"></span>
+        </div>
+    </form>
+
+    <div style="margin-top:1rem;">
+        <label>PAR response</label>
+        <pre id="parOut">{}</pre>
+    </div>
+</div>
+
+<div class="card">
+    <h3>2) Token exchange</h3>
+    <p class="muted small">
+        Since QTSP can’t redirect to localhost, copy the <code>?code=...</code> from the browser’s address bar after login and paste it here.
+    </p>
+
+    <div class="row">
+        <div style="flex: 1 1 560px;">
+            <label for="state">State (auto-filled from PAR)</label>
+            <input id="state" type="text" class="w520" readonly />
+            <div class="muted small">This is used to correlate the browser step with the backend session.</div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 1rem;">
+        <div style="flex: 1 1 560px;">
+            <label for="code">Authorization code</label>
+            <input id="code" type="text" class="w520" placeholder="Paste code here (or paste the full redirect URL)" />
+        </div>
+        <div style="align-self: end;">
+            <button id="exchangeBtn" type="button">Exchange</button>
+        </div>
+        <span id="tokenStatus" class="muted"></span>
+    </div>
+
+    <div style="margin-top:1rem;">
+        <label>Token response</label>
+        <pre id="tokenOut">{}</pre>
+    </div>
+</div>
+
+<script>
+    const parForm = document.getElementById('parForm');
+    const parBtn = document.getElementById('parBtn');
+    const parStatus = document.getElementById('parStatus');
+    const parOut = document.getElementById('parOut');
+
+    const stateEl = document.getElementById('state');
+    const codeEl = document.getElementById('code');
+    const exchangeBtn = document.getElementById('exchangeBtn');
+    const tokenStatus = document.getElementById('tokenStatus');
+    const tokenOut = document.getElementById('tokenOut');
+
+    function setStatus(el, cls, msg) {
+        el.className = cls;
+        el.textContent = msg;
+    }
+
+    function prettyJson(text) {
+        try { return JSON.stringify(JSON.parse(text), null, 2); }
+        catch { return text; }
+    }
+
+    function extractCode(input) {
+        const s = (input || "").trim();
+        if (!s) return "";
+        // allow pasting full redirect URL
+        try {
+            if (s.startsWith("http://") || s.startsWith("https://")) {
+                const u = new URL(s);
+                return u.searchParams.get("code") || "";
+            }
+        } catch (_) {}
+        return s; // assume it's already the code
+    }
+
+    function saveParContext({ state, clientSessionId, nonce }) {
+        if (state) localStorage.setItem("par_state", state);
+        if (clientSessionId) localStorage.setItem("par_clientSessionId", clientSessionId);
+        if (nonce) localStorage.setItem("par_nonce", nonce);
+    }
+
+    function loadParState() {
+        return localStorage.getItem("par_state") || "";
+    }
+
+    // Initialize state field from localStorage (useful after refresh)
+    stateEl.value = loadParState();
+
+    parForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const file = document.getElementById('pdf').files[0];
+        if (!file) return;
+
+        parBtn.disabled = true;
+        setStatus(parStatus, "muted", "Calling /api/par...");
+        parOut.textContent = "{}";
+
+        try {
+            const fd = new FormData();
+            fd.append("pdf", file);
+
+            const res = await fetch("/api/par", {
+                method: "POST",
+                body: fd,
+                headers: { "Accept": "application/json" }
+            });
+
+            const text = await res.text();
+            parOut.textContent = prettyJson(text);
+
+            if (!res.ok) {
+                setStatus(parStatus, "err", `Error: HTTP ${res.status}`);
+                return;
+            }
+
+            const json = JSON.parse(text);
+
+            // Expect ParStartResponse: { redirectUrl, state, nonce, clientSessionId }
+            const state = json.state || "";
+            const nonce = json.nonce || "";
+            const clientSessionId = json.clientSessionId || "";
+
+            stateEl.value = state;
+            saveParContext({ state, nonce, clientSessionId });
+
+            if (json.redirectUrl) {
+                setStatus(parStatus, "ok", "Redirecting to QTSP…");
+                window.location.assign(json.redirectUrl);
+                return;
+            }
+
+            setStatus(parStatus, "err", "Missing redirectUrl in response");
+        } catch (err) {
+            setStatus(parStatus, "err", "Network/JS error");
+            parOut.textContent = String(err);
+        } finally {
+            parBtn.disabled = false;
+        }
+    });
+
+    exchangeBtn.addEventListener("click", async () => {
+        exchangeBtn.disabled = true;
+        tokenOut.textContent = "{}";
+        setStatus(tokenStatus, "muted", "Calling /api/token...");
+
+        try {
+            const state = (stateEl.value || "").trim() || loadParState();
+            const code = extractCode(codeEl.value);
+
+            if (!state) {
+                setStatus(tokenStatus, "err", "Missing state (create PAR first).");
+                return;
+            }
+            if (!code) {
+                setStatus(tokenStatus, "err", "Missing code (paste the code or full redirect URL).");
+                return;
+            }
+
+            const res = await fetch("/api/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({ state, code })
+            });
+
+            const text = await res.text();
+            tokenOut.textContent = prettyJson(text);
+
+            if (!res.ok) {
+                setStatus(tokenStatus, "err", `Error: HTTP ${res.status}`);
+                return;
+            }
+
+            setStatus(tokenStatus, "ok", "OK");
+        } catch (err) {
+            setStatus(tokenStatus, "err", "Network/JS error");
+            tokenOut.textContent = String(err);
+        } finally {
+            exchangeBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package org.sts.demo.signer.crypto;
+package org.sts.demo.signer.config.mtls;
 
 import org.springframework.core.io.Resource;
 
