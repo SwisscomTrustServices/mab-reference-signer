@@ -5,132 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Demo Signer</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; max-width: 980px; }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; max-width: 920px; }
         .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
-        label { display:block; margin:.6rem 0 .2rem; font-weight: 600; }
+        label { display:block; margin:.6rem 0 .2rem; }
         button { padding: .6rem 1rem; cursor: pointer; }
-        input[type="text"] { padding: .55rem .7rem; border: 1px solid #e5e7eb; border-radius: 10px; }
-        input[type="file"] { padding: .4rem 0; }
         pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
         .row { display:flex; gap:1rem; align-items:center; flex-wrap: wrap; }
         .muted { color:#666; }
         .ok { color: #0a7a2f; }
         .err { color: #b42318; }
-        .w520 { width: 520px; max-width: 100%; }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        input[type="text"] { padding: .55rem .6rem; min-width: 360px; }
+        .hint { background:#fff7ed; border:1px solid #fed7aa; padding:.6rem .8rem; border-radius:10px; }
+        .hidden { display:none; }
+        .disabled { opacity: .6; pointer-events: none; }
         .small { font-size: .9rem; }
     </style>
 </head>
 <body>
+
 <h1>Demo Signer</h1>
-<p class="muted">Upload a PDF, create a PAR request, authenticate at QTSP, then paste the returned <code>code</code> to exchange for tokens.</p>
+<p class="muted">
+    End-to-end demo:
+    <b>1)</b> create PAR,
+    <b>2)</b> open QTSP Auth (new tab),
+    <b>3)</b> paste <code>code</code> and exchange for token.
+</p>
 
 <div class="card">
-    <h3>1) Create PAR</h3>
+    <h3 style="margin-top:0;">1) Create PAR</h3>
 
     <form id="parForm">
         <label for="pdf">PDF</label>
         <input id="pdf" name="pdf" type="file" accept="application/pdf" required />
 
         <div class="row" style="margin-top:1rem;">
-            <button type="submit" id="parBtn">Create PAR</button>
+            <button type="submit" id="btnPar">Create PAR</button>
             <span id="parStatus" class="muted"></span>
         </div>
     </form>
+</div>
 
-    <div style="margin-top:1rem;">
-        <label>PAR response</label>
-        <pre id="parOut">{}</pre>
+<div class="card">
+    <h3 style="margin-top:0;">2) Redirect user to QTSP Auth</h3>
+    <p class="muted small" style="margin-top:.25rem;">
+        This opens the QTSP authorization URL generated from discovery + <code>request_uri</code> returned by PAR.
+        After authentication, copy the <code>code</code> from the redirect URL and paste it in step 3.
+    </p>
+
+    <div class="row">
+        <a id="authLink" class="disabled" target="_blank" rel="noopener">
+            <button type="button" id="btnAuth">Open QTSP Auth</button>
+        </a>
+        <span id="authStatus" class="muted">Create PAR first.</span>
+    </div>
+
+    <div class="hint small" style="margin-top:1rem;">
+        Tip: If your company blocks tunneling tools (ngrok, etc.), this manual copy/paste is the simplest demo flow.
     </div>
 </div>
 
 <div class="card">
-    <h3>2) Token exchange</h3>
-    <p class="muted small">
-        Since QTSP can’t redirect to localhost, copy the <code>?code=...</code> from the browser’s address bar after login and paste it here.
-    </p>
+    <h3 style="margin-top:0;">3) Exchange code for token</h3>
 
-    <div class="row">
-        <div style="flex: 1 1 560px;">
-            <label for="state">State (auto-filled from PAR)</label>
-            <input id="state" type="text" class="w520" readonly />
-            <div class="muted small">This is used to correlate the browser step with the backend session.</div>
-        </div>
-    </div>
+    <form id="tokenForm">
+        <label for="authCode">Authorization code</label>
+        <input id="authCode" type="text" placeholder="Paste the code value here" required />
 
-    <div class="row" style="margin-top: 1rem;">
-        <div style="flex: 1 1 560px;">
-            <label for="code">Authorization code</label>
-            <input id="code" type="text" class="w520" placeholder="Paste code here (or paste the full redirect URL)" />
+        <div class="row" style="margin-top:1rem;">
+            <button type="submit" id="btnToken">Exchange Token</button>
+            <span id="tokenStatus" class="muted"></span>
         </div>
-        <div style="align-self: end;">
-            <button id="exchangeBtn" type="button">Exchange</button>
-        </div>
-        <span id="tokenStatus" class="muted"></span>
-    </div>
 
-    <div style="margin-top:1rem;">
-        <label>Token response</label>
-        <pre id="tokenOut">{}</pre>
-    </div>
+        <p class="muted small" style="margin:.75rem 0 0;">
+            This call includes the <code>state</code> (and optionally <code>nonce</code>, <code>clientSessionId</code>)
+            from step 1 so the backend can correlate the session.
+        </p>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="margin-top:0;">Responses</h3>
+    <p class="muted" style="margin-top:0;">PAR response and Token response (truncated to keep the UI readable).</p>
+
+    <h4 style="margin:.5rem 0;">PAR</h4>
+    <pre id="parOut">{}</pre>
+
+    <h4 style="margin:.5rem 0;">Token</h4>
+    <pre id="tokenOut">{}</pre>
 </div>
 
 <script>
-    const parForm = document.getElementById('parForm');
-    const parBtn = document.getElementById('parBtn');
-    const parStatus = document.getElementById('parStatus');
-    const parOut = document.getElementById('parOut');
-
-    const stateEl = document.getElementById('state');
-    const codeEl = document.getElementById('code');
-    const exchangeBtn = document.getElementById('exchangeBtn');
-    const tokenStatus = document.getElementById('tokenStatus');
-    const tokenOut = document.getElementById('tokenOut');
-
-    function setStatus(el, cls, msg) {
-        el.className = cls;
-        el.textContent = msg;
+    // ---------- helpers ----------
+    function setStatus(el, cls, text) {
+        el.className = cls || "muted";
+        el.textContent = text || "";
     }
 
-    function prettyJson(text) {
+    function safeJsonPretty(text) {
+        if (!text) return "(empty body)";
         try { return JSON.stringify(JSON.parse(text), null, 2); }
         catch { return text; }
     }
 
-    function extractCode(input) {
-        const s = (input || "").trim();
-        if (!s) return "";
-        // allow pasting full redirect URL
-        try {
-            if (s.startsWith("http://") || s.startsWith("https://")) {
-                const u = new URL(s);
-                return u.searchParams.get("code") || "";
-            }
-        } catch (_) {}
-        return s; // assume it's already the code
+    function truncateForUi(str, max = 4000) {
+        if (!str) return str;
+        return str.length > max ? (str.substring(0, max) + "\n…(truncated)…") : str;
     }
 
-    function saveParContext({ state, clientSessionId, nonce }) {
-        if (state) localStorage.setItem("par_state", state);
-        if (clientSessionId) localStorage.setItem("par_clientSessionId", clientSessionId);
-        if (nonce) localStorage.setItem("par_nonce", nonce);
+    function setAuthLinkEnabled(enabled) {
+        const link = document.getElementById("authLink");
+        if (enabled) link.classList.remove("disabled");
+        else link.classList.add("disabled");
     }
 
-    function loadParState() {
-        return localStorage.getItem("par_state") || "";
+    function clearParContext() {
+        sessionStorage.removeItem("par.redirectUrl");
+        sessionStorage.removeItem("par.state");
+        sessionStorage.removeItem("par.nonce");
+        sessionStorage.removeItem("par.clientSessionId");
     }
 
-    // Initialize state field from localStorage (useful after refresh)
-    stateEl.value = loadParState();
+    function storeParContext(json) {
+        // Expect backend /api/par response to include these fields
+        sessionStorage.setItem("par.redirectUrl", json.redirectUrl || "");
+        sessionStorage.setItem("par.state", json.state || "");
+        sessionStorage.setItem("par.nonce", json.nonce || "");
+        sessionStorage.setItem("par.clientSessionId", json.clientSessionId || "");
+    }
 
+    function loadParContext() {
+        return {
+            redirectUrl: sessionStorage.getItem("par.redirectUrl") || "",
+            state: sessionStorage.getItem("par.state") || "",
+            nonce: sessionStorage.getItem("par.nonce") || "",
+            clientSessionId: sessionStorage.getItem("par.clientSessionId") || ""
+        };
+    }
+
+    // ---------- elements ----------
+    const parForm = document.getElementById('parForm');
+    const tokenForm = document.getElementById('tokenForm');
+
+    const btnPar = document.getElementById('btnPar');
+    const btnToken = document.getElementById('btnToken');
+
+    const parStatus = document.getElementById('parStatus');
+    const tokenStatus = document.getElementById('tokenStatus');
+
+    const authStatus = document.getElementById('authStatus');
+    const authLink = document.getElementById('authLink');
+
+    const parOut = document.getElementById('parOut');
+    const tokenOut = document.getElementById('tokenOut');
+
+    const authCode = document.getElementById('authCode');
+
+    // Start disabled until PAR succeeded
+    setAuthLinkEnabled(false);
+    authLink.href = "#";
+
+    // If user reloads the page, restore the auth link if context exists
+    (function restoreFromStorage() {
+        const ctx = loadParContext();
+        if (ctx.redirectUrl) {
+            authLink.href = ctx.redirectUrl;
+            setAuthLinkEnabled(true);
+            setStatus(authStatus, "ok", "Ready — click “Open QTSP Auth”");
+        }
+    })();
+
+    // ---------- Step 1: PAR ----------
     parForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const file = document.getElementById('pdf').files[0];
-        if (!file) return;
-
-        parBtn.disabled = true;
-        setStatus(parStatus, "muted", "Calling /api/par...");
         parOut.textContent = "{}";
+        setStatus(parStatus, "muted", "Calling /api/par…");
+
+        // Reset step 2 + stored context
+        clearParContext();
+        authLink.href = "#";
+        setAuthLinkEnabled(false);
+        setStatus(authStatus, "muted", "Create PAR first.");
+
+        const file = document.getElementById('pdf').files[0];
+        if (!file) {
+            setStatus(parStatus, "err", "Please select a PDF");
+            return;
+        }
+
+        btnPar.disabled = true;
 
         try {
             const fd = new FormData();
@@ -143,78 +207,113 @@
             });
 
             const text = await res.text();
-            parOut.textContent = prettyJson(text);
+            parOut.textContent = truncateForUi(safeJsonPretty(text));
 
             if (!res.ok) {
-                setStatus(parStatus, "err", `Error: HTTP ${res.status}`);
+                setStatus(parStatus, "err", `PAR failed (HTTP ${res.status})`);
                 return;
             }
 
             const json = JSON.parse(text);
 
-            // Expect ParStartResponse: { redirectUrl, state, nonce, clientSessionId }
-            const state = json.state || "";
-            const nonce = json.nonce || "";
-            const clientSessionId = json.clientSessionId || "";
+            // ✅ store context for step 3 correlation
+            storeParContext(json);
 
-            stateEl.value = state;
-            saveParContext({ state, nonce, clientSessionId });
-
-            if (json.redirectUrl) {
-                setStatus(parStatus, "ok", "Redirecting to QTSP…");
-                window.location.assign(json.redirectUrl);
+            const ctx = loadParContext();
+            if (!ctx.redirectUrl) {
+                setStatus(parStatus, "err", "Missing redirectUrl in /api/par response");
+                return;
+            }
+            if (!ctx.state) {
+                setStatus(parStatus, "err", "Missing state in /api/par response (needed for token correlation)");
                 return;
             }
 
-            setStatus(parStatus, "err", "Missing redirectUrl in response");
+            // Enable step 2
+            authLink.href = ctx.redirectUrl;
+            setAuthLinkEnabled(true);
+            setStatus(parStatus, "ok", "PAR created");
+            setStatus(authStatus, "ok", "Ready — click “Open QTSP Auth”");
+
+            // Help user: focus code box early
+            authCode.focus();
+
         } catch (err) {
-            setStatus(parStatus, "err", "Network/JS error");
+            setStatus(parStatus, "err", "Network/JS error calling /api/par");
             parOut.textContent = String(err);
         } finally {
-            parBtn.disabled = false;
+            btnPar.disabled = false;
         }
     });
 
-    exchangeBtn.addEventListener("click", async () => {
-        exchangeBtn.disabled = true;
+    // Prevent accidental navigation when disabled
+    authLink.addEventListener("click", (e) => {
+        const ctx = loadParContext();
+        if (!ctx.redirectUrl) {
+            e.preventDefault();
+            setStatus(authStatus, "err", "Create PAR first.");
+        } else {
+            setStatus(authStatus, "ok", "Auth opened — after redirect, copy code and paste in step 3.");
+        }
+    });
+
+    // ---------- Step 3: Token ----------
+    tokenForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
         tokenOut.textContent = "{}";
-        setStatus(tokenStatus, "muted", "Calling /api/token...");
+        setStatus(tokenStatus, "muted", "Calling /api/token…");
+
+        const code = (authCode.value || "").trim();
+        if (!code) {
+            setStatus(tokenStatus, "err", "Please paste the authorization code");
+            return;
+        }
+
+        const ctx = loadParContext();
+        if (!ctx.state) {
+            setStatus(tokenStatus, "err", "Missing PAR context (state). Please run step 1 again.");
+            return;
+        }
+
+        btnToken.disabled = true;
 
         try {
-            const state = (stateEl.value || "").trim() || loadParState();
-            const code = extractCode(codeEl.value);
-
-            if (!state) {
-                setStatus(tokenStatus, "err", "Missing state (create PAR first).");
-                return;
-            }
-            if (!code) {
-                setStatus(tokenStatus, "err", "Missing code (paste the code or full redirect URL).");
-                return;
-            }
+            // ✅ send state/nonce/clientSessionId so backend can correlate
+            const payload = {
+                code,
+                state: ctx.state,
+                nonce: ctx.nonce || null,
+                clientSessionId: ctx.clientSessionId || null
+            };
 
             const res = await fetch("/api/token", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                body: JSON.stringify({ state, code })
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(payload)
             });
 
             const text = await res.text();
-            tokenOut.textContent = prettyJson(text);
+            tokenOut.textContent = truncateForUi(safeJsonPretty(text));
 
             if (!res.ok) {
-                setStatus(tokenStatus, "err", `Error: HTTP ${res.status}`);
+                setStatus(tokenStatus, "err", `Token exchange failed (HTTP ${res.status})`);
                 return;
             }
 
-            setStatus(tokenStatus, "ok", "OK");
+            setStatus(tokenStatus, "ok", "Token OK");
+
         } catch (err) {
-            setStatus(tokenStatus, "err", "Network/JS error");
+            setStatus(tokenStatus, "err", "Network/JS error calling /api/token");
             tokenOut.textContent = String(err);
         } finally {
-            exchangeBtn.disabled = false;
+            btnToken.disabled = false;
         }
     });
 </script>
+
 </body>
 </html>
