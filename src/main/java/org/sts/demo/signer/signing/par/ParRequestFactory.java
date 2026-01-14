@@ -31,8 +31,8 @@ public class ParRequestFactory {
                 .clientSessionId(clientSessionId)
                 .scope(CreateParRequest.ScopeEnum.SIGN)
                 .claims(claims)
-                .loginHint(new CreateParRequestLoginHint()
-                        .namespace(CreateParRequestLoginHint.NamespaceEnum.PWDOTP));
+                .identMethods(null)
+                .loginHint(new CreateParRequestLoginHint().namespace(CreateParRequestLoginHint.NamespaceEnum.PWDOTP));
 
         return new ParStartContext(state, nonce, clientSessionId, req);
     }

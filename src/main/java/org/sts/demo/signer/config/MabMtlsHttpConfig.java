@@ -19,10 +19,9 @@ import static org.sts.demo.signer.config.mtls.NettySslContexts.mtlsClientTls12;
 import static org.sts.demo.signer.config.mtls.PemMaterialLoader.toTempFile;
 
 @Configuration
-public class QtspMtlsHttpConfig {
+public class MabMtlsHttpConfig {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(QtspMtlsHttpConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(MabMtlsHttpConfig.class);
 
     @Bean(name = "qtspMtlsWebClient")
     WebClient qtspMtlsWebClient(
@@ -40,7 +39,7 @@ public class QtspMtlsHttpConfig {
         return WebClient.builder()
                 .baseUrl(props.getMtls().getBaseUrl().toString())
                 .filter((req, next) -> {
-                    log.debug("[QTSP-mTLS bean] {} {}", req.method(), req.url());
+                    log.debug("[MAB-mTLS bean] {} {}", req.method(), req.url());
                     return next.exchange(req);
                 })
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

@@ -12,12 +12,11 @@ public class TokenRequestFactory {
         this.props = props;
     }
 
-    public AuthorizationCodeTokenRequest build(TokenExchangeRequest in) {
+    public AuthorizationCodeTokenRequest buildAuthCode(String code) {
         return new AuthorizationCodeTokenRequest()
-                .grantType(AuthorizationCodeTokenRequest.GrantTypeEnum.AUTHORIZATION_CODE)
                 .clientId(props.getClient().getClientId())
                 .clientSecret(props.getClient().getClientSecret())
-                .code(in.code())
-                .redirectUri(props.getClient().getRedirectUri());
+                .grantType(AuthorizationCodeTokenRequest.GrantTypeEnum.AUTHORIZATION_CODE)
+                .code(code);
     }
 }

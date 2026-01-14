@@ -25,6 +25,6 @@ public class TokenApiController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<TokenExchangeResponse> token(@RequestBody TokenExchangeRequest req) {
-        return signing.exchangeToken(req);
+        return signing.exchangeAuthCodeForAccessToken(req);
     }
 }

@@ -29,7 +29,8 @@
     End-to-end demo:
     <b>1)</b> create PAR,
     <b>2)</b> open QTSP Auth (new tab),
-    <b>3)</b> paste <code>code</code> and exchange for token.
+    <b>3)</b> paste <code>code</code> and exchange for token,
+    <b>4)</b> ETSI sign the hash.
 </p>
 
 <div class="card">
@@ -49,7 +50,7 @@
 <div class="card">
     <h3 style="margin-top:0;">2) Redirect user to QTSP Auth</h3>
     <p class="muted small" style="margin-top:.25rem;">
-        This opens the QTSP authorization URL generated from discovery + <code>request_uri</code> returned by PAR.
+        Opens QTSP authorization URL generated from discovery + <code>request_uri</code>.
         After authentication, copy the <code>code</code> from the redirect URL and paste it in step 3.
     </p>
 
@@ -61,7 +62,7 @@
     </div>
 
     <div class="hint small" style="margin-top:1rem;">
-        Tip: If your company blocks tunneling tools (ngrok, etc.), this manual copy/paste is the simplest demo flow.
+        Tip: Manual copy/paste avoids ngrok/webhook dependencies for this demo.
     </div>
 </div>
 
@@ -76,23 +77,32 @@
             <button type="submit" id="btnToken">Exchange Token</button>
             <span id="tokenStatus" class="muted"></span>
         </div>
-
-        <p class="muted small" style="margin:.75rem 0 0;">
-            This call includes the <code>state</code> (and optionally <code>nonce</code>, <code>clientSessionId</code>)
-            from step 1 so the backend can correlate the session.
-        </p>
     </form>
 </div>
 
 <div class="card">
+    <h3 style="margin-top:0;">4) ETSI Sign (sign the hash)</h3>
+    <p class="muted small" style="margin-top:.25rem;">
+        Uses the <code>access_token</code> (SAD JWT) from step 3 and the stored <code>state/nonce</code> from step 1.
+    </p>
+
+    <div class="row" style="margin-top:1rem;">
+        <button type="button" id="btnSign">Call ETSI Sign</button>
+        <span id="signStatus" class="muted"></span>
+    </div>
+</div>
+
+<div class="card">
     <h3 style="margin-top:0;">Responses</h3>
-    <p class="muted" style="margin-top:0;">PAR response and Token response (truncated to keep the UI readable).</p>
 
     <h4 style="margin:.5rem 0;">PAR</h4>
     <pre id="parOut">{}</pre>
 
     <h4 style="margin:.5rem 0;">Token</h4>
     <pre id="tokenOut">{}</pre>
+
+    <h4 style="margin:.5rem 0;">ETSI Sign</h4>
+    <pre id="signOut">{}</pre>
 </div>
 
 <script>
@@ -119,61 +129,38 @@
         else link.classList.add("disabled");
     }
 
-    function clearParContext() {
-        sessionStorage.removeItem("par.redirectUrl");
-        sessionStorage.removeItem("par.state");
-        sessionStorage.removeItem("par.nonce");
-        sessionStorage.removeItem("par.clientSessionId");
-    }
-
-    function storeParContext(json) {
-        // Expect backend /api/par response to include these fields
-        sessionStorage.setItem("par.redirectUrl", json.redirectUrl || "");
-        sessionStorage.setItem("par.state", json.state || "");
-        sessionStorage.setItem("par.nonce", json.nonce || "");
-        sessionStorage.setItem("par.clientSessionId", json.clientSessionId || "");
-    }
-
-    function loadParContext() {
-        return {
-            redirectUrl: sessionStorage.getItem("par.redirectUrl") || "",
-            state: sessionStorage.getItem("par.state") || "",
-            nonce: sessionStorage.getItem("par.nonce") || "",
-            clientSessionId: sessionStorage.getItem("par.clientSessionId") || ""
-        };
-    }
-
     // ---------- elements ----------
     const parForm = document.getElementById('parForm');
     const tokenForm = document.getElementById('tokenForm');
 
     const btnPar = document.getElementById('btnPar');
     const btnToken = document.getElementById('btnToken');
+    const btnSign = document.getElementById('btnSign');
 
     const parStatus = document.getElementById('parStatus');
     const tokenStatus = document.getElementById('tokenStatus');
+    const signStatus = document.getElementById('signStatus');
 
     const authStatus = document.getElementById('authStatus');
     const authLink = document.getElementById('authLink');
 
     const parOut = document.getElementById('parOut');
     const tokenOut = document.getElementById('tokenOut');
+    const signOut = document.getElementById('signOut');
 
     const authCode = document.getElementById('authCode');
+
+    // ---------- state we keep in the browser ----------
+    let lastRedirectUrl = null;
+    let lastState = null;
+    let lastNonce = null;
+    let lastClientSessionId = null;
+
+    let lastAccessToken = null; // SAD JWT / access token (from /api/token)
 
     // Start disabled until PAR succeeded
     setAuthLinkEnabled(false);
     authLink.href = "#";
-
-    // If user reloads the page, restore the auth link if context exists
-    (function restoreFromStorage() {
-        const ctx = loadParContext();
-        if (ctx.redirectUrl) {
-            authLink.href = ctx.redirectUrl;
-            setAuthLinkEnabled(true);
-            setStatus(authStatus, "ok", "Ready — click “Open QTSP Auth”");
-        }
-    })();
 
     // ---------- Step 1: PAR ----------
     parForm.addEventListener('submit', async (e) => {
@@ -182,8 +169,17 @@
         parOut.textContent = "{}";
         setStatus(parStatus, "muted", "Calling /api/par…");
 
-        // Reset step 2 + stored context
-        clearParContext();
+        // Reset following steps
+        lastRedirectUrl = null;
+        lastState = null;
+        lastNonce = null;
+        lastClientSessionId = null;
+        lastAccessToken = null;
+        tokenOut.textContent = "{}";
+        signOut.textContent = "{}";
+        setStatus(tokenStatus, "muted", "");
+        setStatus(signStatus, "muted", "");
+
         authLink.href = "#";
         setAuthLinkEnabled(false);
         setStatus(authStatus, "muted", "Create PAR first.");
@@ -216,26 +212,26 @@
 
             const json = JSON.parse(text);
 
-            // ✅ store context for step 3 correlation
-            storeParContext(json);
+            lastRedirectUrl = json.redirectUrl;
+            lastState = json.state;
+            lastNonce = json.nonce;
+            lastClientSessionId = json.clientSessionId;
 
-            const ctx = loadParContext();
-            if (!ctx.redirectUrl) {
+            if (!lastRedirectUrl) {
                 setStatus(parStatus, "err", "Missing redirectUrl in /api/par response");
                 return;
             }
-            if (!ctx.state) {
-                setStatus(parStatus, "err", "Missing state in /api/par response (needed for token correlation)");
+            if (!lastState || !lastNonce) {
+                setStatus(parStatus, "err", "Missing state/nonce in /api/par response (UI needs these for later steps)");
                 return;
             }
 
             // Enable step 2
-            authLink.href = ctx.redirectUrl;
+            authLink.href = lastRedirectUrl;
             setAuthLinkEnabled(true);
             setStatus(parStatus, "ok", "PAR created");
             setStatus(authStatus, "ok", "Ready — click “Open QTSP Auth”");
 
-            // Help user: focus code box early
             authCode.focus();
 
         } catch (err) {
@@ -248,8 +244,7 @@
 
     // Prevent accidental navigation when disabled
     authLink.addEventListener("click", (e) => {
-        const ctx = loadParContext();
-        if (!ctx.redirectUrl) {
+        if (!lastRedirectUrl) {
             e.preventDefault();
             setStatus(authStatus, "err", "Create PAR first.");
         } else {
@@ -262,38 +257,30 @@
         e.preventDefault();
 
         tokenOut.textContent = "{}";
+        signOut.textContent = "{}";
         setStatus(tokenStatus, "muted", "Calling /api/token…");
+        setStatus(signStatus, "muted", "");
 
         const code = (authCode.value || "").trim();
         if (!code) {
             setStatus(tokenStatus, "err", "Please paste the authorization code");
             return;
         }
-
-        const ctx = loadParContext();
-        if (!ctx.state) {
-            setStatus(tokenStatus, "err", "Missing PAR context (state). Please run step 1 again.");
+        if (!lastState || !lastNonce) {
+            setStatus(tokenStatus, "err", "Missing state/nonce in UI — run step 1 again");
             return;
         }
 
         btnToken.disabled = true;
 
         try {
-            // ✅ send state/nonce/clientSessionId so backend can correlate
-            const payload = {
-                code,
-                state: ctx.state,
-                nonce: ctx.nonce || null,
-                clientSessionId: ctx.clientSessionId || null
-            };
-
             const res = await fetch("/api/token", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ code, state: lastState, nonce: lastNonce })
             });
 
             const text = await res.text();
@@ -304,13 +291,69 @@
                 return;
             }
 
-            setStatus(tokenStatus, "ok", "Token OK");
+            const json = JSON.parse(text);
+            lastAccessToken = json.accessToken || json.access_token || null;
+
+            if (!lastAccessToken) {
+                setStatus(tokenStatus, "err", "Token OK but missing accessToken in response");
+                return;
+            }
+
+            setStatus(tokenStatus, "ok", "Token OK (ready to sign)");
 
         } catch (err) {
             setStatus(tokenStatus, "err", "Network/JS error calling /api/token");
             tokenOut.textContent = String(err);
         } finally {
             btnToken.disabled = false;
+        }
+    });
+
+    // ---------- Step 4: ETSI Sign ----------
+    btnSign.addEventListener('click', async () => {
+        signOut.textContent = "{}";
+        setStatus(signStatus, "muted", "Calling /api/etsi/sign…");
+
+        if (!lastState || !lastNonce) {
+            setStatus(signStatus, "err", "Missing state/nonce — run step 1 again");
+            return;
+        }
+        if (!lastAccessToken) {
+            setStatus(signStatus, "err", "Missing access token — complete step 3 first");
+            return;
+        }
+
+        btnSign.disabled = true;
+
+        try {
+            const res = await fetch("/api/etsi/sign", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    state: lastState,
+                    nonce: lastNonce,
+                    sadJwt: lastAccessToken
+                })
+            });
+
+            const text = await res.text();
+            signOut.textContent = truncateForUi(safeJsonPretty(text));
+
+            if (!res.ok) {
+                setStatus(signStatus, "err", `ETSI sign failed (HTTP ${res.status})`);
+                return;
+            }
+
+            setStatus(signStatus, "ok", "ETSI sign OK");
+
+        } catch (err) {
+            setStatus(signStatus, "err", "Network/JS error calling /api/etsi/sign");
+            signOut.textContent = String(err);
+        } finally {
+            btnSign.disabled = false;
         }
     });
 </script>

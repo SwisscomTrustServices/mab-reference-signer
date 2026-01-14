@@ -1,30 +1,32 @@
 package org.sts.demo.signer.web.api;
 
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.sts.demo.signer.signing.SigningOrchestrationService;
-import org.sts.demo.signer.signing.par.ParStartResponse;
+import org.sts.demo.signer.signing.etsi.EtsiSignStartRequest;
+import org.sts.demo.signer.signing.etsi.EtsiSignStartResponse;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api")
-public class ParApiController {
+public class EtsiApiController {
     private final SigningOrchestrationService signing;
 
-    public ParApiController(SigningOrchestrationService signing) {
+    public EtsiApiController(SigningOrchestrationService signing) {
         this.signing = signing;
     }
 
     @PostMapping(
-            path="/par",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            path = "/etsi/sign",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<ParStartResponse> par(@RequestPart("pdf") MultipartFile pdf) {
-        return signing.pushPar(pdf);
+
+    public Mono<EtsiSignStartResponse> sign(@Valid @RequestBody EtsiSignStartRequest req) {
+        return signing.signEtsi(req);
     }
 }

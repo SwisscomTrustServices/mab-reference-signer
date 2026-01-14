@@ -5,7 +5,7 @@ qtsp:
   client:
     client-id: "783328de-33cb-4570-bc7a-fbee6f1c2773"
     client-secret: "5902ce7c-ad57-4c2f-8d9e-32d3e54daa95"
-    redirect-uri: https://rax-preprod.scapp.swisscom.com
+    redirect-uri: "https://webhook.site/a319e2dd-b637-4d68-a32a-cf38781e2ca3"
   mtls:
     base-url: https://rax-preprod.mtls-scapp.swisscom.com
     client-cert: classpath:test-client.pem

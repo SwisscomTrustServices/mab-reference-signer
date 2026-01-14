@@ -36,6 +36,7 @@ public class ParClient {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 
+        log.info("PAR request payload={}", json.toPrettyString());
         log.info("PAR POST {} clientSessionId={}", endpoints.parUri(), req.getClientSessionId());
 
         return mtlsWebClient.post()
