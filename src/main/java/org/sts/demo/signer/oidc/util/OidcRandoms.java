@@ -10,7 +10,6 @@ public final class OidcRandoms {
 
     public static String state() { return randomBase64Url(16); }
     public static String nonce() { return randomBase64Url(16); }
-    public static String pkceVerifier() { return randomBase64Url(32); }
 
     private static String randomBase64Url(int bytes) {
         byte[] b = new byte[bytes];

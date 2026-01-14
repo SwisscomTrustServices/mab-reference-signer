@@ -6,14 +6,6 @@ import org.openapi.mab.model.CreateParRequestClaims;
 public final class HashAlgorithmMapper {
     private HashAlgorithmMapper() {}
 
-    public static HashAlgorithm fromMab(CreateParRequestClaims.HashAlgorithmOIDEnum mabAlg) {
-        return switch (mabAlg) {
-            case _1 -> HashAlgorithm.SHA256;
-            case _2 -> HashAlgorithm.SHA384;
-            case _3 -> HashAlgorithm.SHA512;
-        };
-    }
-
     public static EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum toEtsi(HashAlgorithm alg) {
         return switch (alg) {
             case SHA256 -> EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum._1;

@@ -14,6 +14,7 @@ import org.sts.demo.signer.signing.etsi.EtsiSignClient;
 import org.sts.demo.signer.signing.etsi.EtsiSignRequestFactory;
 import org.sts.demo.signer.signing.etsi.EtsiSignStartRequest;
 import org.sts.demo.signer.signing.etsi.EtsiSignStartResponse;
+import org.sts.demo.signer.signing.mapping.HashAlgorithm;
 import org.sts.demo.signer.signing.par.ParClient;
 import org.sts.demo.signer.signing.par.ParRequestFactory;
 import org.sts.demo.signer.signing.par.ParStartResponse;
@@ -25,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static org.sts.demo.signer.signing.mapping.HashAlgorithmMapper.fromMab;
+import static org.sts.demo.signer.signing.mapping.HashAlgorithmMapper.toMab;
 import static org.sts.demo.signer.signing.util.DigestUtils.sha256Base64;
 
 @Service
@@ -33,18 +34,16 @@ public class SigningOrchestrationService {
 
     private final ParRequestFactory parRequestFactory;
     private final ParClient parClient;
-
     private final OidcEndpoints endpoints;
     private final QtspProperties props;
     private final SigningSessionStore sessions;
-
     private final TokenRequestFactory tokenRequestFactory;
     private final TokenClient tokenClient;
-
     private final EtsiSignRequestFactory etsiSignRequestFactory;
     private final EtsiSignClient etsiSignClient;
-
     private final SigningSessionValidator signingSessionValidator;
+
+    private final HashAlgorithm hashAlgorithm = HashAlgorithm.SHA256;
 
     public SigningOrchestrationService(ParRequestFactory parRequestFactory,
                                        ParClient parClient,
@@ -81,7 +80,7 @@ public class SigningOrchestrationService {
 
                         CreateParRequestClaims claims = new CreateParRequestClaims();
                         claims.setCredentialID(CreateParRequestClaims.CredentialIDEnum.ADVANCED4);
-                        claims.setHashAlgorithmOID(CreateParRequestClaims.HashAlgorithmOIDEnum._1);
+                        claims.setHashAlgorithmOID(toMab(hashAlgorithm));
                         claims.setDocumentDigests(List.of(
                                 new CreateParRequestClaimsDocumentDigestsInner()
                                         .hash(digestB64)
@@ -95,10 +94,6 @@ public class SigningOrchestrationService {
                                 var reqClaims = ctx.request().getClaims();
                                 if (reqClaims == null) {
                                     return Mono.error(new IllegalStateException("PAR claims missing"));
-                                }
-                                var alg = reqClaims.getHashAlgorithmOID();
-                                if (alg == null) {
-                                    return Mono.error(new IllegalStateException("hashAlgorithmOID missing"));
                                 }
                                 var digests = reqClaims.getDocumentDigests();
                                 if (digests == null || digests.isEmpty()) {
@@ -115,7 +110,7 @@ public class SigningOrchestrationService {
                                         ctx.clientSessionId(),
                                         pdf.getOriginalFilename(),
                                         firstDigest.getHash(),
-                                        fromMab(alg)
+                                        hashAlgorithm
                                 ));
 
                                 String redirectUrl = UriComponentsBuilder
