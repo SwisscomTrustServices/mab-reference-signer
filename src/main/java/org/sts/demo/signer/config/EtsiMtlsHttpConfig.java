@@ -17,25 +17,33 @@ import java.io.File;
 import static org.sts.demo.signer.config.mtls.NettySslContexts.mtlsClientTls12;
 import static org.sts.demo.signer.config.mtls.PemMaterialLoader.toTempFile;
 
+/**
+ * Separate mTLS client for ETSI RDSC calls.
+ * <p>
+ * Intentionally NOT shared with MAB/OIDC mTLS client
+ * to make trust boundaries explicit:
+ * <p>
+ * - MAB: authentication, consent, SAD issuance
+ * - ETSI: signature creation only
+ * <p>
+ * Even if certificates are currently identical,
+ * endpoints, audiences and policies differ.
+ */
 @Configuration
 public class EtsiMtlsHttpConfig {
 
     private static final Logger log = LoggerFactory.getLogger(EtsiMtlsHttpConfig.class);
 
     @Bean(name = "etsiMtlsWebClient")
-    WebClient etsiMtlsWebClient(
-            QtspProperties props
-    ) throws Exception {
+    WebClient etsiMtlsWebClient(QtspProperties props) throws Exception {
 
         File certFile = toTempFile(props.getMtls().getClientCert(), "qtsp-cert", ".pem");
         File keyFile = toTempFile(props.getMtls().getClientKey(), "qtsp-key", ".key");
 
         SslContext nettySslContext = mtlsClientTls12(certFile, keyFile);
-
         HttpClient httpClient = HttpClient.create()
                 .secure(ssl -> ssl.sslContext(nettySslContext));
 
-        // IMPORTANT: baseUrl must be the *mTLS* host for ETSI
         return WebClient.builder()
                 .filter((req, next) -> {
                     log.debug("[ETSI-mTLS bean] {} {}", req.method(), req.url());
@@ -46,10 +54,8 @@ public class EtsiMtlsHttpConfig {
     }
 
     @Bean(name = "etsiMtlsApiClient")
-    ApiClient etsiMtlsApiClient(@Qualifier("etsiMtlsWebClient") WebClient wc,
-                                QtspProperties props) {
+    ApiClient etsiMtlsApiClient(@Qualifier("etsiMtlsWebClient") WebClient wc) {
         ApiClient apiClient = new ApiClient(wc);
-        apiClient.setBasePath(props.getMtls().getBaseUrl().toString()); // adjust if ETSI has different basePath
         apiClient.addDefaultHeader("Accept", "application/json");
         return apiClient;
     }

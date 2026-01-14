@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.sts.demo.signer.signing.SigningOrchestrationService;
-import org.sts.demo.signer.signing.etsi.EtsiSignStartRequest;
-import org.sts.demo.signer.signing.etsi.EtsiSignStartResponse;
+import org.sts.demo.signer.signing.api.EtsiSignStartRequest;
+import org.sts.demo.signer.signing.api.EtsiSignStartResponse;
 import reactor.core.publisher.Mono;
 
 @RestController

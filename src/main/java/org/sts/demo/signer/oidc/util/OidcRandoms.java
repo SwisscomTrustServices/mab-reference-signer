@@ -8,11 +8,11 @@ public final class OidcRandoms {
 
     private OidcRandoms() {}
 
-    public static String state() { return randomBase64Url(16); }
-    public static String nonce() { return randomBase64Url(16); }
+    public static String state() { return randomBase64Url(); }
+    public static String nonce() { return randomBase64Url(); }
 
-    private static String randomBase64Url(int bytes) {
-        byte[] b = new byte[bytes];
+    private static String randomBase64Url() {
+        byte[] b = new byte[16];
         RNG.nextBytes(b);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(b);
     }

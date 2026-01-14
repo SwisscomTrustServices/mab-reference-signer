@@ -1,9 +1,9 @@
 package org.sts.demo.signer.signing.etsi;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.openapi.etsi.invoker.ApiClient;
 import org.openapi.etsi.model.EtsiSignRequest;
 import org.openapi.etsi.model.EtsiSignResponse;
-import org.openapi.etsi.invoker.ApiClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

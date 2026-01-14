@@ -10,23 +10,27 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.sts.demo.signer.config.QtspProperties;
 import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
+import org.sts.demo.signer.signing.domain.HashAlgorithm;
+import org.sts.demo.signer.signing.domain.SigningSession;
+import org.sts.demo.signer.signing.domain.SigningSessionStore;
+import org.sts.demo.signer.signing.domain.SigningSessionValidator;
 import org.sts.demo.signer.signing.etsi.EtsiSignClient;
 import org.sts.demo.signer.signing.etsi.EtsiSignRequestFactory;
-import org.sts.demo.signer.signing.etsi.EtsiSignStartRequest;
-import org.sts.demo.signer.signing.etsi.EtsiSignStartResponse;
-import org.sts.demo.signer.signing.mapping.HashAlgorithm;
-import org.sts.demo.signer.signing.par.ParClient;
-import org.sts.demo.signer.signing.par.ParRequestFactory;
-import org.sts.demo.signer.signing.par.ParStartResponse;
-import org.sts.demo.signer.signing.token.TokenClient;
-import org.sts.demo.signer.signing.token.TokenExchangeRequest;
-import org.sts.demo.signer.signing.token.TokenExchangeResponse;
-import org.sts.demo.signer.signing.token.TokenRequestFactory;
+import org.sts.demo.signer.signing.api.EtsiSignStartRequest;
+import org.sts.demo.signer.signing.api.EtsiSignStartResponse;
+import org.sts.demo.signer.signing.mab.par.ParClient;
+import org.sts.demo.signer.signing.mab.par.ParRequestFactory;
+import org.sts.demo.signer.signing.api.ParStartResponse;
+import org.sts.demo.signer.signing.mab.par.ParStartContext;
+import org.sts.demo.signer.signing.mab.token.TokenClient;
+import org.sts.demo.signer.signing.api.TokenExchangeRequest;
+import org.sts.demo.signer.signing.api.TokenExchangeResponse;
+import org.sts.demo.signer.signing.mab.token.TokenRequestFactory;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 
-import static org.sts.demo.signer.signing.mapping.HashAlgorithmMapper.toMab;
 import static org.sts.demo.signer.signing.util.DigestUtils.sha256Base64;
 
 @Service
@@ -43,7 +47,9 @@ public class SigningOrchestrationService {
     private final EtsiSignClient etsiSignClient;
     private final SigningSessionValidator signingSessionValidator;
 
-    private final HashAlgorithm hashAlgorithm = HashAlgorithm.SHA256;
+    private static final HashAlgorithm HASH_ALGORITHM = HashAlgorithm.SHA256;
+
+    private record ParBuilt(ParStartContext ctx, String digestB64) {}
 
     public SigningOrchestrationService(ParRequestFactory parRequestFactory,
                                        ParClient parClient,
@@ -74,60 +80,54 @@ public class SigningOrchestrationService {
             }
 
             return Mono.fromCallable(pdf::getBytes)
+                    .subscribeOn(Schedulers.boundedElastic())
                     .onErrorMap(e -> new IllegalArgumentException("Failed to read PDF", e))
                     .map(bytes -> {
                         String digestB64 = sha256Base64(bytes);
 
                         CreateParRequestClaims claims = new CreateParRequestClaims();
                         claims.setCredentialID(CreateParRequestClaims.CredentialIDEnum.ADVANCED4);
-                        claims.setHashAlgorithmOID(toMab(hashAlgorithm));
+                        claims.setHashAlgorithmOID(HASH_ALGORITHM.toMab());
                         claims.setDocumentDigests(List.of(
                                 new CreateParRequestClaimsDocumentDigestsInner()
                                         .hash(digestB64)
                                         .label("Document-1")
                         ));
 
-                        return parRequestFactory.buildDemoRequest(claims); // ParStartContext
+                        ParStartContext ctx = parRequestFactory.buildDemoRequest(claims);
+                        return new ParBuilt(ctx, digestB64);
                     })
-                    .flatMap(ctx -> parClient.send(ctx.request())
-                            .flatMap(par -> {
-                                var reqClaims = ctx.request().getClaims();
-                                if (reqClaims == null) {
-                                    return Mono.error(new IllegalStateException("PAR claims missing"));
-                                }
-                                var digests = reqClaims.getDocumentDigests();
-                                if (digests == null || digests.isEmpty()) {
-                                    return Mono.error(new IllegalStateException("documentDigests missing"));
-                                }
-                                var firstDigest = digests.getFirst();
-                                if (firstDigest == null || firstDigest.getHash().isBlank()) {
-                                    return Mono.error(new IllegalStateException("first documentDigest hash missing"));
-                                }
+                    .flatMap(built ->
+                            parClient.send(built.ctx().request())
+                                    .map(par -> {
+                                        // Store session keyed by state (we trust our own computed digest)
+                                        sessions.put(new SigningSession(
+                                                built.ctx().state(),
+                                                built.ctx().nonce(),
+                                                built.digestB64(),
+                                                HASH_ALGORITHM
+                                        ));
 
-                                sessions.put(new SigningSession(
-                                        ctx.state(),
-                                        ctx.nonce(),
-                                        ctx.clientSessionId(),
-                                        pdf.getOriginalFilename(),
-                                        firstDigest.getHash(),
-                                        hashAlgorithm
-                                ));
+                                        // NOTE: keep query params consistent with your MAB setup;
+                                        // request_uri usually carries most of this already.
+                                        String redirectUrl = UriComponentsBuilder
+                                                .fromUriString(endpoints.authorizationUri())
+                                                .queryParam("client_id", props.getClient().getClientId().toString())
+                                                .queryParam("redirect_uri", props.getClient().getRedirectUri())
+                                                .queryParam("request_uri", par.getRequestUri())
+                                                .queryParam("state", built.ctx().state())
+                                                .queryParam("nonce", built.ctx().nonce())
+                                                .queryParam("response_type", "code")
+                                                .build(true)
+                                                .toUriString();
 
-                                String redirectUrl = UriComponentsBuilder
-                                        .fromUriString(endpoints.authorizationUri())
-                                        .queryParam("client_id", props.getClient().getClientId().toString())
-                                        .queryParam("redirect_uri", props.getClient().getRedirectUri())
-                                        .queryParam("request_uri", par.getRequestUri())
-                                        .queryParam("state", ctx.state())
-                                        .queryParam("nonce", ctx.nonce())
-                                        .queryParam("response_type", "code")
-                                        .build(true)
-                                        .toUriString();
-
-                                return Mono.just(new ParStartResponse(
-                                        redirectUrl, ctx.state(), ctx.nonce(), ctx.clientSessionId()
-                                ));
-                            })
+                                        return new ParStartResponse(
+                                                redirectUrl,
+                                                built.ctx().state(),
+                                                built.ctx().nonce(),
+                                                built.ctx().clientSessionId()
+                                        );
+                                    })
                     );
         });
     }
@@ -139,12 +139,9 @@ public class SigningOrchestrationService {
                             if (in.code() == null || in.code().isBlank()) {
                                 return Mono.error(new IllegalArgumentException("Missing authorization code"));
                             }
-
-                            // 1) code -> access token
                             AuthorizationCodeTokenRequest authReq = tokenRequestFactory.buildAuthCode(in.code());
 
-                            return tokenClient.exchange(authReq)
-                                    .map(this::toTokenExchangeResponse);
+                            return tokenClient.exchange(authReq).map(this::toTokenExchangeResponse);
                         })
         );
     }

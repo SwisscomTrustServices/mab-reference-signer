@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing;
+package org.sts.demo.signer.signing.domain;
 
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;

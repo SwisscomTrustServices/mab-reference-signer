@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.token;
+package org.sts.demo.signer.signing.api;
 
 public record TokenExchangeResponse(
         String accessToken,

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.sts.demo.signer.signing.SigningOrchestrationService;
-import org.sts.demo.signer.signing.par.ParStartResponse;
+import org.sts.demo.signer.signing.api.ParStartResponse;
 import reactor.core.publisher.Mono;
 
 @RestController

@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.par;
+package org.sts.demo.signer.signing.api;
 
 public record ParStartResponse(
         String redirectUrl,

@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.etsi;
+package org.sts.demo.signer.signing.api;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -40,7 +40,7 @@ public class OidcEndpoints {
         }
         URI discoveredUri = URI.create(url);
 
-        URI mtlsBase = props.getMtls().getBaseUrl(); // e.g. https://...mtls-scapp...
+        URI mtlsBase = props.getMtls().getBaseUrl();
         return mtlsBase.toString().replaceAll("/+$","") + discoveredUri.getPath();
     }
 }

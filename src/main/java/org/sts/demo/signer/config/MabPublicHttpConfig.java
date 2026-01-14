@@ -10,21 +10,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class MabPublicHttpConfig {
 
     @Bean(name = "qtspPublicWebClient")
-    WebClient qtspPublicWebClient(QtspProperties props) {
-        return WebClient.builder()
-                .baseUrl(props.getBaseUrl().toString())
-                .build();
+    WebClient qtspPublicWebClient() {
+        return WebClient.builder().build();
     }
 
     @Bean(name = "qtspPublicApiClient")
-    public ApiClient qtspPublicApiClient(
-            WebClient qtspPublicWebClient,
-            QtspProperties props
-    ) {
+    public ApiClient qtspPublicApiClient(WebClient qtspPublicWebClient) {
         ApiClient apiClient = new ApiClient(qtspPublicWebClient);
-        apiClient.setBasePath(props.getBaseUrl().toString());
         apiClient.addDefaultHeader("Accept", "application/json");
-
         return apiClient;
     }
 

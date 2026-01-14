@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.sts.demo.signer.signing.SigningOrchestrationService;
-import org.sts.demo.signer.signing.token.TokenExchangeRequest;
-import org.sts.demo.signer.signing.token.TokenExchangeResponse;
+import org.sts.demo.signer.signing.api.TokenExchangeRequest;
+import org.sts.demo.signer.signing.api.TokenExchangeResponse;
 import reactor.core.publisher.Mono;
 
 @RestController

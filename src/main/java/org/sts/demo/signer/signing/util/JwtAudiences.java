@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.etsi;
+package org.sts.demo.signer.signing.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

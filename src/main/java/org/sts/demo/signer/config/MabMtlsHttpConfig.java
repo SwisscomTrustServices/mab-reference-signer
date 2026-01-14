@@ -1,7 +1,6 @@
 package org.sts.demo.signer.config;
 
 import io.netty.handler.ssl.SslContext;
-
 import org.openapi.mab.api.OidcApi;
 import org.openapi.mab.invoker.ApiClient;
 import org.slf4j.Logger;
@@ -24,20 +23,16 @@ public class MabMtlsHttpConfig {
     private static final Logger log = LoggerFactory.getLogger(MabMtlsHttpConfig.class);
 
     @Bean(name = "qtspMtlsWebClient")
-    WebClient qtspMtlsWebClient(
-            QtspProperties props
-    ) throws Exception {
+    WebClient qtspMtlsWebClient(QtspProperties props) throws Exception {
 
         File certFile = toTempFile(props.getMtls().getClientCert(), "qtsp-cert", ".pem");
         File keyFile = toTempFile(props.getMtls().getClientKey(), "qtsp-key", ".key");
 
         SslContext nettySslContext = mtlsClientTls12(certFile, keyFile);
-
         HttpClient httpClient = HttpClient.create()
                 .secure(ssl -> ssl.sslContext(nettySslContext));
 
         return WebClient.builder()
-                .baseUrl(props.getMtls().getBaseUrl().toString())
                 .filter((req, next) -> {
                     log.debug("[MAB-mTLS bean] {} {}", req.method(), req.url());
                     return next.exchange(req);
@@ -47,21 +42,14 @@ public class MabMtlsHttpConfig {
     }
 
     @Bean(name = "qtspMtlsApiClient")
-    ApiClient qtspMtlsApiClient(
-            @Qualifier("qtspMtlsWebClient") WebClient mtlsWebClient,
-            QtspProperties props
-    ) {
-        var apiClient = new ApiClient(mtlsWebClient);
-        apiClient.setBasePath(props.getMtls().getBaseUrl().toString());
+    ApiClient qtspMtlsApiClient(@Qualifier("qtspMtlsWebClient") WebClient wc) {
+        ApiClient apiClient = new ApiClient(wc);
         apiClient.addDefaultHeader("Accept", "application/json");
-
         return apiClient;
     }
 
     @Bean(name = "qtspMtlsOidcApi")
-    OidcApi qtspMtlsOidcApi(
-            @Qualifier("qtspMtlsApiClient") ApiClient apiClient
-    ) {
+    OidcApi qtspMtlsOidcApi(@Qualifier("qtspMtlsApiClient") ApiClient apiClient) {
         return new OidcApi(apiClient);
     }
 }

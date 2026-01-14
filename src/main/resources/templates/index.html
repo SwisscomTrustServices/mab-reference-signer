@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Demo Signer</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; max-width: 920px; }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem; max-width: 1300px; }
         .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
         label { display:block; margin:.6rem 0 .2rem; }
         button { padding: .6rem 1rem; cursor: pointer; }
@@ -20,6 +20,22 @@
         .hidden { display:none; }
         .disabled { opacity: .6; pointer-events: none; }
         .small { font-size: .9rem; }
+
+        .stepGrid {
+            display: grid;
+            grid-template-columns: 1.1fr 1.3fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        .stepLeft { min-width: 0; }
+        .stepRight { min-width: 0; }
+        .stepRight h4 { margin: 0 0 .5rem 0; }
+        .stepRight pre { max-height: 280px; }
+
+        @media (max-width: 980px) {
+            .stepGrid { grid-template-columns: 1fr; }
+            .stepRight pre { max-height: 240px; }
+        }
     </style>
 </head>
 <body>
@@ -33,76 +49,102 @@
     <b>4)</b> ETSI sign the hash.
 </p>
 
+<!-- Step 1 -->
 <div class="card">
-    <h3 style="margin-top:0;">1) Create PAR</h3>
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 style="margin-top:0;">1) Create PAR</h3>
 
-    <form id="parForm">
-        <label for="pdf">PDF</label>
-        <input id="pdf" name="pdf" type="file" accept="application/pdf" required />
+            <form id="parForm">
+                <label for="pdf">PDF</label>
+                <input id="pdf" name="pdf" type="file" accept="application/pdf" required/>
 
-        <div class="row" style="margin-top:1rem;">
-            <button type="submit" id="btnPar">Create PAR</button>
-            <span id="parStatus" class="muted"></span>
+                <div class="row" style="margin-top:1rem;">
+                    <button type="submit" id="btnPar">Create PAR</button>
+                    <span id="parStatus" class="muted"></span>
+                </div>
+            </form>
         </div>
-    </form>
-</div>
-
-<div class="card">
-    <h3 style="margin-top:0;">2) Redirect user to QTSP Auth</h3>
-    <p class="muted small" style="margin-top:.25rem;">
-        Opens QTSP authorization URL generated from discovery + <code>request_uri</code>.
-        After authentication, copy the <code>code</code> from the redirect URL and paste it in step 3.
-    </p>
-
-    <div class="row">
-        <a id="authLink" class="disabled" target="_blank" rel="noopener">
-            <button type="button" id="btnAuth">Open QTSP Auth</button>
-        </a>
-        <span id="authStatus" class="muted">Create PAR first.</span>
-    </div>
-
-    <div class="hint small" style="margin-top:1rem;">
-        Tip: Manual copy/paste avoids ngrok/webhook dependencies for this demo.
-    </div>
-</div>
-
-<div class="card">
-    <h3 style="margin-top:0;">3) Exchange code for token</h3>
-
-    <form id="tokenForm">
-        <label for="authCode">Authorization code</label>
-        <input id="authCode" type="text" placeholder="Paste the code value here" required />
-
-        <div class="row" style="margin-top:1rem;">
-            <button type="submit" id="btnToken">Exchange Token</button>
-            <span id="tokenStatus" class="muted"></span>
+        <div class="stepRight">
+            <h4>PAR response</h4>
+            <pre id="parOut">{}</pre>
         </div>
-    </form>
-</div>
-
-<div class="card">
-    <h3 style="margin-top:0;">4) ETSI Sign (sign the hash)</h3>
-    <p class="muted small" style="margin-top:.25rem;">
-        Uses the <code>access_token</code> (SAD JWT) from step 3 and the stored <code>state/nonce</code> from step 1.
-    </p>
-
-    <div class="row" style="margin-top:1rem;">
-        <button type="button" id="btnSign">Call ETSI Sign</button>
-        <span id="signStatus" class="muted"></span>
     </div>
 </div>
 
+<!-- Step 2 -->
 <div class="card">
-    <h3 style="margin-top:0;">Responses</h3>
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 style="margin-top:0;">2) Redirect user to QTSP Auth</h3>
+            <p class="muted small" style="margin-top:.25rem;">
+                Opens QTSP authorization URL generated from discovery + <code>request_uri</code>.
+                After authentication, copy the <code>code</code> from the redirect URL and paste it in step 3.
+            </p>
 
-    <h4 style="margin:.5rem 0;">PAR</h4>
-    <pre id="parOut">{}</pre>
+            <div class="row">
+                <a id="authLink" class="disabled" target="_blank" rel="noopener">
+                    <button type="button" id="btnAuth">Open QTSP Auth</button>
+                </a>
+                <span id="authStatus" class="muted">Create PAR first.</span>
+            </div>
 
-    <h4 style="margin:.5rem 0;">Token</h4>
-    <pre id="tokenOut">{}</pre>
+            <div class="hint small" style="margin-top:1rem;">
+                Tip: Manual copy/paste avoids ngrok/webhook dependencies for this demo.
+            </div>
+        </div>
+        <div class="stepRight">
+            <h4>What to copy</h4>
+            <pre id="authOut">After login you will be redirected to your redirect_uri.
+Copy the "code" query parameter from the URL and paste it in step 3.</pre>
+        </div>
+    </div>
+</div>
 
-    <h4 style="margin:.5rem 0;">ETSI Sign</h4>
-    <pre id="signOut">{}</pre>
+<!-- Step 3 -->
+<div class="card">
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 style="margin-top:0;">3) Exchange code for token</h3>
+
+            <form id="tokenForm">
+                <label for="authCode">Authorization code</label>
+                <input id="authCode" type="text" placeholder="Paste the code value here" required/>
+
+                <div class="row" style="margin-top:1rem;">
+                    <button type="submit" id="btnToken">Exchange Token</button>
+                    <span id="tokenStatus" class="muted"></span>
+                </div>
+            </form>
+        </div>
+        <div class="stepRight">
+            <h4>Token response</h4>
+            <pre id="tokenOut">{}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Step 4 -->
+<div class="card">
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 style="margin-top:0;">4) ETSI Sign (sign a document digest)</h3>
+            <p class="muted small" style="margin-top:.25rem;">
+                Uses the <code>access_token</code> (SAD JWT) from step 3 and the stored <code>state/nonce</code> from
+                step 1.
+            </p>
+
+            <div class="row" style="margin-top:1rem;">
+                <button type="button" id="btnSign">Call ETSI Sign</button>
+                <span id="signStatus" class="muted"></span>
+            </div>
+        </div>
+
+        <div class="stepRight">
+            <h4>ETSI sign response</h4>
+            <pre id="signOut">{}</pre>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -155,8 +197,7 @@
     let lastState = null;
     let lastNonce = null;
     let lastClientSessionId = null;
-
-    let lastAccessToken = null; // SAD JWT / access token (from /api/token)
+    let lastAccessToken = null;
 
     // Start disabled until PAR succeeded
     setAuthLinkEnabled(false);

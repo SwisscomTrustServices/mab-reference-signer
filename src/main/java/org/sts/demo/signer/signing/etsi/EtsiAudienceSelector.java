@@ -1,5 +1,7 @@
 package org.sts.demo.signer.signing.etsi;
 
+import org.sts.demo.signer.signing.util.JwtAudiences;
+
 import java.net.URI;
 
 public final class EtsiAudienceSelector {

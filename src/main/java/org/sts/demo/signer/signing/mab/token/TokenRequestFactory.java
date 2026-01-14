@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.token;
+package org.sts.demo.signer.signing.mab.token;
 
 import org.openapi.mab.model.AuthorizationCodeTokenRequest;
 import org.springframework.stereotype.Component;
