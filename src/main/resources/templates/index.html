@@ -56,8 +56,20 @@
             <h3 style="margin-top:0;">1) Create PAR</h3>
 
             <form id="parForm">
-                <label for="pdf">PDF</label>
-                <input id="pdf" name="pdf" type="file" accept="application/pdf" required/>
+                    <label for="pdf">PDF</label>
+                    <input id="pdf" name="pdf" type="file" accept="application/pdf" required/>
+
+                    <label>Signature level</label>
+                    <div class="row level-row">
+                        <label class="radio">
+                            <input type="radio" name="level" value="ADVANCED" checked />
+                            Advanced (ZertES "Fasttrack OSS")
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="level" value="QUALIFIED" />
+                            Qualified (ZertES "Repetitive")
+                        </label>
+                    </div>
 
                 <div class="row" style="margin-top:1rem;">
                     <button type="submit" id="btnPar">Create PAR</button>
@@ -230,12 +242,14 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
             setStatus(parStatus, "err", "Please select a PDF");
             return;
         }
+        const cred = document.querySelector('input[name="level"]:checked')?.value || "ADVANCED";
 
         btnPar.disabled = true;
 
         try {
             const fd = new FormData();
             fd.append("pdf", file);
+            fd.append("credentialId", cred);
 
             const res = await fetch("/api/par", {
                 method: "POST",

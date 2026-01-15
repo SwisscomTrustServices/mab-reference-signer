@@ -25,7 +25,6 @@ public class EtsiApiController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-
     public Mono<EtsiSignStartResponse> sign(@Valid @RequestBody EtsiSignStartRequest req) {
         return signing.signEtsi(req);
     }

@@ -24,7 +24,10 @@ public class ParApiController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<ParStartResponse> par(@RequestPart("pdf") MultipartFile pdf) {
-        return signing.pushPar(pdf);
+    public Mono<ParStartResponse> par(
+            @RequestPart("pdf") MultipartFile pdf,
+            @RequestPart("credentialId") String credentialId
+    ) {
+        return signing.pushPar(pdf, credentialId);
     }
 }
