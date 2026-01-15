@@ -100,7 +100,6 @@ public class SigningOrchestrationService {
                     .flatMap(built ->
                             parClient.send(built.ctx().request())
                                     .map(par -> {
-                                        // store session keyed by state
                                         sessions.put(new SigningSession(
                                                 built.ctx().state(),
                                                 built.ctx().nonce(),
@@ -173,7 +172,7 @@ public class SigningOrchestrationService {
                         .flatMap(session -> {
                             EtsiSignRequest req = etsiSignRequestFactory.build(session);
 
-                            return etsiSignClient.sign(req)   // adjust to your real method signature
+                            return etsiSignClient.sign(req)
                                     .map(EtsiResponseMapper::toEmbedResponse);
                         })
         );

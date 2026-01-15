@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 
-import static org.springframework.util.StringUtils.truncate;
 import static org.sts.demo.signer.signing.etsi.EtsiAudienceSelector.pickEtsiBaseUri;
 
 @Service
@@ -38,6 +37,7 @@ public class EtsiSignClient {
         JsonNullPruner.pruneNulls(json);
 
         URI signUri = pickEtsiBaseUri(req.getSAD());
+        log.info("ETSI request payload={}", json.toPrettyString());
         log.info("SIGN POST {}", signUri);
 
         return mtlsWebClient.post()
@@ -54,7 +54,7 @@ public class EtsiSignClient {
                     return resp.bodyToMono(String.class)
                             .defaultIfEmpty("")
                             .flatMap(body -> {
-                                log.warn("ETSI failed status={} body={}", status, truncate(body, 800));
+                                log.warn("ETSI failed status={} body={}", status, body);
                                 return Mono.error(new IllegalStateException("ETSI failed: " + status));
                             });
                 });

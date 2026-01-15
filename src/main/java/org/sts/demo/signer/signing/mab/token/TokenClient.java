@@ -53,8 +53,7 @@ public class TokenClient {
                     return resp.bodyToMono(String.class)
                             .defaultIfEmpty("")
                             .flatMap(body -> {
-                                String truncated = body.length() > 500 ? body.substring(0, 500) + "…" : body;
-                                log.warn("Token failed status={} body={}", status, truncated);
+                                log.warn("Token failed status={} body={}", status, body);
                                 return Mono.error(new IllegalStateException("Token failed: " + status));
                             });
                 });

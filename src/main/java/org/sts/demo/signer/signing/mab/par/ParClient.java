@@ -37,7 +37,7 @@ public class ParClient {
         JsonNullPruner.pruneNulls(json);
 
         log.info("PAR request payload={}", json.toPrettyString());
-        log.info("PAR POST {} clientSessionId={}", endpoints.parUri(), req.getClientSessionId());
+        log.info("PAR POST {}", endpoints.parUri());
 
         return mtlsWebClient.post()
                 .uri(endpoints.parUri())
@@ -53,8 +53,7 @@ public class ParClient {
                         return resp.bodyToMono(String.class)
                                 .defaultIfEmpty("")
                                 .flatMap(body -> {
-                                    String truncated = body.length() > 500 ? body.substring(0, 500) + "…" : body;
-                                    log.warn("PAR failed status={} body={}", status, truncated);
+                                    log.warn("PAR failed status={} body={}", status, body);
                                     return Mono.error(new IllegalStateException("PAR failed: " + status));
                                 });
                     }
