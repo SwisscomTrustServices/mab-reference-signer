@@ -4,7 +4,6 @@ import org.openapi.etsi.model.EtsiSignRequest;
 import org.openapi.mab.model.AuthorizationCodeTokenRequest;
 import org.openapi.mab.model.CreateParRequestClaims;
 import org.openapi.mab.model.CreateParRequestClaimsDocumentDigestsInner;
-import org.openapi.mab.model.TokenResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,6 +13,7 @@ import org.sts.demo.signer.signing.domain.HashAlgorithm;
 import org.sts.demo.signer.signing.domain.SigningSession;
 import org.sts.demo.signer.signing.domain.SigningSessionStore;
 import org.sts.demo.signer.signing.domain.SigningSessionValidator;
+import org.sts.demo.signer.signing.etsi.EtsiResponseMapper;
 import org.sts.demo.signer.signing.etsi.EtsiSignClient;
 import org.sts.demo.signer.signing.etsi.EtsiSignRequestFactory;
 import org.sts.demo.signer.signing.api.EtsiSignStartRequest;
@@ -100,17 +100,16 @@ public class SigningOrchestrationService {
                     .flatMap(built ->
                             parClient.send(built.ctx().request())
                                     .map(par -> {
-                                        // Store session keyed by state (we trust our own computed digest)
+                                        // store session keyed by state
                                         sessions.put(new SigningSession(
                                                 built.ctx().state(),
                                                 built.ctx().nonce(),
                                                 built.digestB64(),
-                                                HASH_ALGORITHM
+                                                HASH_ALGORITHM,
+                                                null
                                         ));
 
-                                        // NOTE: keep query params consistent with your MAB setup;
-                                        // request_uri usually carries most of this already.
-                                        String redirectUrl = UriComponentsBuilder
+                                        String redirectUri = UriComponentsBuilder
                                                 .fromUriString(endpoints.authorizationUri())
                                                 .queryParam("client_id", props.getClient().getClientId().toString())
                                                 .queryParam("redirect_uri", props.getClient().getRedirectUri())
@@ -122,7 +121,7 @@ public class SigningOrchestrationService {
                                                 .toUriString();
 
                                         return new ParStartResponse(
-                                                redirectUrl,
+                                                redirectUri,
                                                 built.ctx().state(),
                                                 built.ctx().nonce(),
                                                 built.ctx().clientSessionId()
@@ -141,32 +140,41 @@ public class SigningOrchestrationService {
                             }
                             AuthorizationCodeTokenRequest authReq = tokenRequestFactory.buildAuthCode(in.code());
 
-                            return tokenClient.exchange(authReq).map(this::toTokenExchangeResponse);
+                            return tokenClient.exchange(authReq)
+                                    .flatMap(tr -> {
+                                        String sadJwt = tr.getAccessToken();
+                                        if (sadJwt.isBlank()) {
+                                            return Mono.error(new IllegalStateException("Token response missing access_token"));
+                                        }
+
+                                        sessions.put(session.withSadJwt(sadJwt));
+
+                                        return Mono.just(new TokenExchangeResponse(
+                                                redactJwt(sadJwt),
+                                                tr.getTokenType(),
+                                                tr.getExpiresIn(),
+                                                tr.getScope().getValue()
+                                        ));
+                                    });
                         })
         );
     }
 
-    private TokenExchangeResponse toTokenExchangeResponse(TokenResponse tr) {
-        return new TokenExchangeResponse(
-                tr.getAccessToken(),
-                tr.getTokenType(),
-                tr.getExpiresIn(),
-                tr.getScope().getValue(),
-                tr.getRefreshToken()
-        );
+    private static String redactJwt(String jwt) {
+        if (jwt == null || jwt.length() < 40) {
+            return jwt;
+        }
+        return jwt.substring(0, 40) + "...***redacted***";
     }
 
     public Mono<EtsiSignStartResponse> signEtsi(EtsiSignStartRequest in) {
         return Mono.defer(() ->
                 signingSessionValidator.validate(in.state(), in.nonce())
                         .flatMap(session -> {
-                            if (in.sadJwt() == null || in.sadJwt().isBlank()) {
-                                return Mono.error(new IllegalArgumentException("Missing SAD JWT"));
-                            }
                             EtsiSignRequest req = etsiSignRequestFactory.build(session);
 
-                            return etsiSignClient.sign(in.sadJwt(), req)   // adjust to your real method signature
-                                    .map(EtsiSignStartResponse::new);
+                            return etsiSignClient.sign(req)   // adjust to your real method signature
+                                    .map(EtsiResponseMapper::toEmbedResponse);
                         })
         );
     }

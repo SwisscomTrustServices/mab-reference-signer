@@ -19,10 +19,11 @@ public class EtsiSignRequestFactory {
 
     public EtsiSignRequest build(SigningSession session) {
         EtsiSignRequestDocumentDigests digests = new EtsiSignRequestDocumentDigests()
-                .hashAlgorithmOID(session.hashAlgOid().toEtsi())
+                .hashAlgorithmOID(session.hashAlg().toEtsi())
                 .hashes(List.of(session.digestB64()));
 
         return new EtsiSignRequest()
+                .SAD(session.sadJwt())
                 .documentDigests(digests)
                 .credentialID(EtsiSignRequest.CredentialIDEnum.ADVANCED4)
                 .signatureFormat(EtsiSignRequest.SignatureFormatEnum.P);

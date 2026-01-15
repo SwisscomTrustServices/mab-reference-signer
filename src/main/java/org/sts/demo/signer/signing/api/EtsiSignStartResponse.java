@@ -1,7 +1,10 @@
 package org.sts.demo.signer.signing.api;
 
-import org.openapi.etsi.model.EtsiSignResponse;
+import java.util.UUID;
 
 public record EtsiSignStartResponse(
-        EtsiSignResponse etsiResponse
+        UUID responseId,
+        String cmsBase64Redacted,
+        int cmsBytes,
+        String cmsSha256B64
 ) {}

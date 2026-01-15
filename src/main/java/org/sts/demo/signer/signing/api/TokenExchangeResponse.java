@@ -4,6 +4,5 @@ public record TokenExchangeResponse(
         String accessToken,
         String tokenType,
         String expiresIn,
-        String idToken,
-        String raw
+        String scope
 ) {}

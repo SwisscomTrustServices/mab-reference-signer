@@ -4,6 +4,5 @@ import jakarta.validation.constraints.NotBlank;
 
 public record EtsiSignStartRequest (
         @NotBlank String state,
-        @NotBlank String nonce,
-        @NotBlank String sadJwt
+        @NotBlank String nonce
 ) {}

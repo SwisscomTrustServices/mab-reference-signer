@@ -33,16 +33,11 @@ public class EtsiSignClient {
         this.apiClient = apiClient;
     }
 
-    public Mono<EtsiSignResponse> sign(String sadJwt, EtsiSignRequest req) {
-        req.setSAD(sadJwt);
+    public Mono<EtsiSignResponse> sign(EtsiSignRequest req) {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 
-        // delete
-        log.info("ETSI request payload={}", json.toPrettyString());
-
-        URI signUri = pickEtsiBaseUri(sadJwt);
-
+        URI signUri = pickEtsiBaseUri(req.getSAD());
         log.info("SIGN POST {}", signUri);
 
         return mtlsWebClient.post()

@@ -1,7 +1,9 @@
 package org.sts.demo.signer.signing.api;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record TokenExchangeRequest(
-        String code,
-        String state,
-        String nonce
+        @NotBlank String code,
+        @NotBlank String state,
+        @NotBlank String nonce
 ) {}

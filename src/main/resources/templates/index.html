@@ -193,7 +193,7 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
     const authCode = document.getElementById('authCode');
 
     // ---------- state we keep in the browser ----------
-    let lastRedirectUrl = null;
+    let lastAuthorizationUrl = null;
     let lastState = null;
     let lastNonce = null;
     let lastClientSessionId = null;
@@ -211,7 +211,7 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
         setStatus(parStatus, "muted", "Calling /api/par…");
 
         // Reset following steps
-        lastRedirectUrl = null;
+        lastAuthorizationUrl = null;
         lastState = null;
         lastNonce = null;
         lastClientSessionId = null;
@@ -253,13 +253,13 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
 
             const json = JSON.parse(text);
 
-            lastRedirectUrl = json.redirectUrl;
+            lastAuthorizationUrl = json.authorizationUrl;
             lastState = json.state;
             lastNonce = json.nonce;
             lastClientSessionId = json.clientSessionId;
 
-            if (!lastRedirectUrl) {
-                setStatus(parStatus, "err", "Missing redirectUrl in /api/par response");
+            if (!lastAuthorizationUrl) {
+                setStatus(parStatus, "err", "Missing authorizationUrl in /api/par response");
                 return;
             }
             if (!lastState || !lastNonce) {
@@ -268,7 +268,7 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
             }
 
             // Enable step 2
-            authLink.href = lastRedirectUrl;
+            authLink.href = lastAuthorizationUrl;
             setAuthLinkEnabled(true);
             setStatus(parStatus, "ok", "PAR created");
             setStatus(authStatus, "ok", "Ready — click “Open QTSP Auth”");
@@ -285,7 +285,7 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
 
     // Prevent accidental navigation when disabled
     authLink.addEventListener("click", (e) => {
-        if (!lastRedirectUrl) {
+        if (!lastAuthorizationUrl) {
             e.preventDefault();
             setStatus(authStatus, "err", "Create PAR first.");
         } else {

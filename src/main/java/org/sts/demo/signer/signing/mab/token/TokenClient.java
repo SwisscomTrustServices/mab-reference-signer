@@ -2,6 +2,7 @@ package org.sts.demo.signer.signing.mab.token;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.openapi.mab.invoker.ApiClient;
+import org.openapi.mab.model.AuthorizationCodeTokenRequest;
 import org.openapi.mab.model.TokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class TokenClient {
         this.endpoints = endpoints;
     }
 
-    public Mono<TokenResponse> exchange(Object req) {
+    public Mono<TokenResponse> exchange(AuthorizationCodeTokenRequest req) {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 
