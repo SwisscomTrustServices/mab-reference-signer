@@ -1,14 +1,14 @@
 qtsp:
   oidc:
-    discovery-path: "${QTSP_DISCOVERY_PATH:https://example.invalid/.well-known/openid-configuration}"
+    discovery-path: "${DISCOVERY_PATH:https://example.invalid/.well-known/openid-configuration}"
   client:
-    client-id: "${QTSP_CLIENT_ID:00000000-0000-0000-0000-000000000000}"
-    client-secret: "${QTSP_CLIENT_SECRET:00000000-0000-0000-0000-000000000000}"
-    redirect-uri: "${QTSP_REDIRECT_URI:https://example.invalid/callback}"
+    client-id: "${CLIENT_ID:00000000-0000-0000-0000-000000000000}"
+    client-secret: "${CLIENT_SECRET:00000000-0000-0000-0000-000000000000}"
+    redirect-uri: "${REDIRECT_URI:https://example.invalid/callback}"
   mtls:
-    base-url: "${QTSP_MTLS_BASE_URL:https://example.invalid}"
-    client-cert: "${QTSP_MTLS_CLIENT_CERT:classpath:demo-client.pem}"
-    client-key: "${QTSP_MTLS_CLIENT_KEY:classpath:demo-client.key}"
+    base-url: "${MTLS_BASE_URL:https://example.invalid}"
+    client-cert: "${MTLS_CLIENT_CERT:classpath:demo-client.pem}"
+    client-key: "${MTLS_CLIENT_KEY:classpath:demo-client.key}"
 
 server:
   port: 8081

@@ -55,17 +55,15 @@ The repository ships with safe defaults like:
 Set these before starting the app:
 
 ```bash
-export QTSP_DISCOVERY_PATH="https://rax-preprod.scapp.swisscom.com/api/auth/realms/broker/.well-known/openid-configuration"
+export DISCOVERY_PATH="https://rax-preprod.scapp.swisscom.com/api/auth/realms/broker/.well-known/openid-configuration"
 
-export QTSP_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-export QTSP_CLIENT_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export CLIENT_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+export REDIRECT_URI="https://webhook.site/<your-id>"
 
-export QTSP_MTLS_BASE_URL="https://rax-preprod.mtls-scapp.swisscom.com"
-
-export QTSP_MTLS_CLIENT_CERT="classpath:test-client.pem"
-export QTSP_MTLS_CLIENT_KEY="classpath:test-client.key"
-
-export QTSP_REDIRECT_URI="https://webhook.site/<your-id>"
+export MTLS_BASE_URL="https://rax-preprod.mtls-scapp.swisscom.com"
+export MTLS_CLIENT_CERT="classpath:test-client.pem"
+export MTLS_CLIENT_KEY="classpath:test-client.key"
 ```
 
 For local development you can also point redirect URI to any endpoint that lets you inspect the URL parameters and copy the code.
