@@ -42,3 +42,27 @@ bin/
 .DS_Store
 /src/main/resources/mab_preprod_private.key
 /src/main/resources/SCM-SIGN-Manuel.pem
+/src/main/resources/application-dev.yaml
+
+# secrets / local config
+.env
+.env.*
+application-local.yml
+application-local.yaml
+application-dev.yml
+application-dev.yaml
+
+# certs/keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# build
+target/
+.gradle/
+.idea/
+
+# logs
+*.log

@@ -1,7 +1,6 @@
 package org.sts.demo.signer.signing.domain;
 
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 @Component
 public class SigningSessionValidator {
@@ -11,24 +10,20 @@ public class SigningSessionValidator {
         this.sessions = sessions;
     }
 
-    public Mono<SigningSession> validate(String state, String nonce) {
-        if (state == null || state.isBlank()) {
-            return Mono.error(new IllegalArgumentException("Missing state"));
-        }
-
+    public SigningSession validateAndGet(String state, String nonce) {
+        requireNonBlank(state, "Missing state");
+        requireNonBlank(nonce, "Missing nonce");
         SigningSession session = sessions.get(state);
         if (session == null) {
-            return Mono.error(new IllegalArgumentException("Unknown/expired state"));
+            throw new IllegalArgumentException("Unknown/expired state");
         }
-
-        if (nonce == null || nonce.isBlank()) {
-            return Mono.error(new IllegalArgumentException("Missing nonce"));
-        }
-
         if (!nonce.equals(session.nonce())) {
-            return Mono.error(new IllegalArgumentException("Invalid nonce for state"));
+            throw new IllegalArgumentException("Invalid nonce for state");
         }
+        return session;
+    }
 
-        return Mono.just(session);
+    private static void requireNonBlank(String value, String message) {
+        if (value == null || value.isBlank()) throw new IllegalArgumentException(message);
     }
 }

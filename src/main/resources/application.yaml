@@ -1,24 +1,27 @@
 qtsp:
   oidc:
-    discovery-path: https://rax-preprod.scapp.swisscom.com/api/auth/realms/broker/.well-known/openid-configuration
+    discovery-path: "${QTSP_DISCOVERY_PATH:https://example.invalid/.well-known/openid-configuration}"
   client:
-    client-id: 783328de-33cb-4570-bc7a-fbee6f1c2773
-    client-secret: 5902ce7c-ad57-4c2f-8d9e-32d3e54daa95
-    redirect-uri: https://webhook.site/a319e2dd-b637-4d68-a32a-cf38781e2ca3
+    client-id: "${QTSP_CLIENT_ID:00000000-0000-0000-0000-000000000000}"
+    client-secret: "${QTSP_CLIENT_SECRET:00000000-0000-0000-0000-000000000000}"
+    redirect-uri: "${QTSP_REDIRECT_URI:https://example.invalid/callback}"
   mtls:
-    base-url: https://rax-preprod.mtls-scapp.swisscom.com
-    client-cert: classpath:test-client.pem
-    client-key: classpath:test-client.key
+    base-url: "${QTSP_MTLS_BASE_URL:https://example.invalid}"
+    client-cert: "${QTSP_MTLS_CLIENT_CERT:classpath:demo-client.pem}"
+    client-key: "${QTSP_MTLS_CLIENT_KEY:classpath:demo-client.key}"
 
 server:
   port: 8081
 
 logging:
   level:
+    root: INFO
+    org.springframework.web: INFO
+    org.sts.demo.signer: INFO
     reactor.netty: WARN
     io.netty: WARN
     io.netty.handler.ssl.BouncyCastlePemReader: ERROR
 
 spring:
   profiles:
-    active: dev
+    active: "${SPRING_PROFILES_ACTIVE:dev}"

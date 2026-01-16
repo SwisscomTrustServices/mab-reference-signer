@@ -5,6 +5,5 @@ import java.util.UUID;
 public record EtsiSignStartResponse(
         UUID responseId,
         String cmsBase64Redacted,
-        int cmsBytes,
-        String cmsSha256B64
+        int cmsBytes
 ) {}

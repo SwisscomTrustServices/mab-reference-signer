@@ -1,13 +1,11 @@
 package org.sts.demo.signer.web.api;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.sts.demo.signer.signing.SigningOrchestrationService;
 import org.sts.demo.signer.signing.api.ParStartResponse;
+import org.sts.demo.signer.signing.domain.SigningJourney;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -26,8 +24,8 @@ public class ParApiController {
     )
     public Mono<ParStartResponse> par(
             @RequestPart("pdf") MultipartFile pdf,
-            @RequestPart("credentialId") String credentialId
+            @RequestParam("journey") SigningJourney journey
     ) {
-        return signing.pushPar(pdf, credentialId);
+        return signing.pushPar(pdf, journey);
     }
 }

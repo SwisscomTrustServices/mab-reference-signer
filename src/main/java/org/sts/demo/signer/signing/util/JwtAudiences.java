@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import static org.sts.demo.signer.signing.util.Redactor.pad;
+
 public final class JwtAudiences {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -35,10 +37,5 @@ public final class JwtAudiences {
             return out;
         }
         return List.of();
-    }
-
-    private static String pad(String b64) {
-        int mod = b64.length() % 4;
-        return mod == 0 ? b64 : b64 + "====".substring(mod);
     }
 }

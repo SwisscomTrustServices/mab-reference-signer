@@ -7,6 +7,7 @@ import org.openapi.mab.model.CreateParRequestLoginHint;
 import org.springframework.stereotype.Component;
 import org.sts.demo.signer.config.QtspProperties;
 import org.sts.demo.signer.oidc.util.OidcRandoms;
+import org.sts.demo.signer.signing.domain.SigningJourney;
 import org.sts.demo.signer.signing.domain.HashAlgorithm;
 
 import java.net.URI;
@@ -25,8 +26,8 @@ public class ParRequestFactory {
         this.props = props;
     }
 
-    public ParStartContext buildDemoRequest(String credentialId, String digestB64) {
-        ParPolicy policy = policyFor(credentialId);
+    public ParStartContext buildDemoRequest(SigningJourney journey, String digestB64) {
+        ParPolicy policy = policyFor(journey);
 
         CreateParRequestClaims claims = new CreateParRequestClaims();
         claims.setCredentialID(policy.credentialId());
@@ -51,8 +52,8 @@ public class ParRequestFactory {
                 .claims(claims)
                 .identMethods(null);
 
-        if (policy.namespaceOrNull() != null) {
-            req.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespaceOrNull()));
+        if (policy.namespace() != null) {
+            req.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespace()));
         }
 
         return new ParStartContext(state, nonce, digestB64, req, HASH_ALGORITHM);
