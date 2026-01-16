@@ -29,8 +29,7 @@ public class DebugController {
                 "issuer", cfg.issuer(),
                 "authorization_endpoint", cfg.authorizationEndpoint(),
                 "token_endpoint", cfg.tokenEndpoint(),
-                "pushed_authorization_request_endpoint", cfg.pushedAuthorizationRequestEndpoint(),
-                "jwks_uri", cfg.jwksUri()
+                "pushed_authorization_request_endpoint", cfg.pushedAuthorizationRequestEndpoint()
         ));
     }
 }
