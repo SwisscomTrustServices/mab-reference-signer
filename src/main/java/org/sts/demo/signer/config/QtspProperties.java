@@ -19,8 +19,7 @@ public class QtspProperties {
     @Valid @NotNull
     private Client client = new Client();
 
-    @Valid
-    @NotNull
+    @Valid @NotNull
     private Mtls mtls = new Mtls();
 
     public static class Oidc {
@@ -37,13 +36,10 @@ public class QtspProperties {
         private UUID clientSecret;
         @NotNull
         private URI redirectUri;
-
         public UUID getClientId() { return clientId; }
         public void setClientId(UUID clientId) { this.clientId = clientId; }
-
         public UUID getClientSecret() { return clientSecret; }
         public void setClientSecret(UUID clientSecret) { this.clientSecret = clientSecret; }
-
         public URI getRedirectUri() { return redirectUri; }
         public void setRedirectUri(URI redirectUri) { this.redirectUri = redirectUri; }
     }
