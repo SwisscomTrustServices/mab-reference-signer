@@ -17,6 +17,7 @@ import java.net.URI;
 
 import static org.sts.demo.signer.signing.etsi.EtsiAudienceSelector.pickEtsiBaseUri;
 
+
 @Service
 public class EtsiSignClient {
     private static final Logger log = LoggerFactory.getLogger(EtsiSignClient.class);

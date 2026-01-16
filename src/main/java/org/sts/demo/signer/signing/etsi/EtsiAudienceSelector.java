@@ -3,16 +3,19 @@ package org.sts.demo.signer.signing.etsi;
 import org.sts.demo.signer.signing.util.JwtAudiences;
 
 import java.net.URI;
+import java.util.List;
 
 public final class EtsiAudienceSelector {
     private EtsiAudienceSelector() {}
 
-    public static URI pickEtsiBaseUri(String accessToken) {
-        return JwtAudiences.aud(accessToken).stream()
-                .filter(a -> a.startsWith("https://"))
-                .filter(a -> a.contains("etsi") || a.contains("sign")) // adapt to your reality
-                .findFirst()
-                .map(a -> URI.create(a.replaceAll("/+$", "")))
-                .orElseThrow(() -> new IllegalStateException("No ETSI audience URL in access_token aud"));
+    public static URI pickEtsiBaseUri(String sadJwt) {
+        List<String> auds = JwtAudiences.aud(sadJwt);
+        if (auds.isEmpty()) {
+            throw new IllegalStateException("No aud in SAD JWT");
+        }
+        if (auds.size() != 1) {
+            throw new IllegalStateException("Expected exactly 1 aud, got " + auds.size());
+        }
+        return URI.create(auds.getFirst());
     }
 }

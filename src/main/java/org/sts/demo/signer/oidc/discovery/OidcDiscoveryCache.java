@@ -28,7 +28,7 @@ public class OidcDiscoveryCache {
             QtspProperties props
     ) {
         this.publicClient = publicClient;
-        this.discoveryUri = props.getBaseUrl().resolve(props.getOidc().getDiscoveryPath());
+        this.discoveryUri = props.getOidc().getDiscoveryPath();
     }
 
     @PostConstruct

@@ -13,9 +13,6 @@ import java.util.UUID;
 @Validated
 public class QtspProperties {
 
-    @NotNull
-    private URI baseUrl;
-
     @Valid @NotNull
     private Oidc oidc = new Oidc();
 
@@ -28,9 +25,9 @@ public class QtspProperties {
 
     public static class Oidc {
         @NotNull
-        private String discoveryPath;
-        public String getDiscoveryPath() { return discoveryPath; }
-        public void setDiscoveryPath(String discoveryPath) { this.discoveryPath = discoveryPath; }
+        private URI discoveryPath;
+        public URI getDiscoveryPath() { return discoveryPath; }
+        public void setDiscoveryPath(URI discoveryPath) { this.discoveryPath = discoveryPath; }
     }
 
     public static class Client {
@@ -66,8 +63,6 @@ public class QtspProperties {
         public void setClientKey(Resource clientKey) { this.clientKey = clientKey; }
     }
 
-    public URI getBaseUrl() { return baseUrl; }
-    public void setBaseUrl(URI baseUrl) { this.baseUrl = baseUrl; }
     public Oidc getOidc() { return oidc; }
     public void setOidc(Oidc oidc) { this.oidc = oidc; }
     public Client getClient() { return client; }
