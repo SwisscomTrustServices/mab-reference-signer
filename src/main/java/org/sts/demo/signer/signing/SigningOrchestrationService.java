@@ -147,7 +147,7 @@ public class SigningOrchestrationService {
         return value.trim();
     }
 
-    private TokenExchangeResponse toTokenExchangeResponse(String sadJwt, TokenResponse tr) {
+    private static TokenExchangeResponse toTokenExchangeResponse(String sadJwt, TokenResponse tr) {
         return new TokenExchangeResponse(
                 redactJwt(sadJwt),
                 tr.getTokenType(),
