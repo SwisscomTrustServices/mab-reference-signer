@@ -55,13 +55,13 @@ The repository ships with safe defaults like:
 Set these before starting the app:
 
 ```bash
-export DISCOVERY_PATH="https://rax-preprod.scapp.swisscom.com/api/auth/realms/broker/.well-known/openid-configuration"
+export DISCOVERY_PATH="https://example.invalid/.well-known/openid-configuration"
 
 export CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 export CLIENT_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 export REDIRECT_URI="https://webhook.site/<your-id>"
 
-export MTLS_BASE_URL="https://rax-preprod.mtls-scapp.swisscom.com"
+export MTLS_BASE_URL="https://example.invalid"
 export MTLS_CLIENT_CERT="classpath:test-client.pem"
 export MTLS_CLIENT_KEY="classpath:test-client.key"
 ```
