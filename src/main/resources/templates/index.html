@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -233,7 +233,9 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
 
             <div class="row" style="margin-top:1rem;">
                 <button type="button" id="btnSign">Call ETSI Sign</button>
+                <button type="button" id="btnDownloadPdf" class="disabled">Download signed PDF</button>
                 <span id="signStatus" class="muted"></span>
+                <span id="downloadStatus" class="muted"></span>
             </div>
         </div>
 
@@ -246,6 +248,33 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
 
 <script>
     // ---------- helpers ----------
+    function setEnabled(btn, enabled) {
+        btn.disabled = !enabled;
+        if (enabled) btn.classList.remove("disabled");
+        else btn.classList.add("disabled");
+    }
+
+    function downloadPdfFromBase64(base64, filename) {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename || "signed-document.pdf";
+        document.body.appendChild(a);
+        a.click();
+
+        URL.revokeObjectURL(url);
+        a.remove();
+    }
+
     function setStatus(el, cls, text) {
         el.className = cls || "muted";
         el.textContent = text || "";
@@ -297,12 +326,18 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
 
     const authCode = document.getElementById('authCode');
 
+    const btnDownloadPdf = document.getElementById('btnDownloadPdf');
+    const downloadStatus = document.getElementById('downloadStatus');
+    setEnabled(btnDownloadPdf, false);
+
     // ---------- state we keep in the browser ----------
     let lastAuthorizationUrl = null;
     let lastState = null;
     let lastNonce = null;
     let lastClientSessionId = null;
     let lastAccessToken = null;
+    let lastSignedPdfBase64 = null;
+    let lastSignedPdfFilename = null;
 
     // Start disabled until PAR succeeded
     setAuthLinkEnabled(false);
@@ -329,6 +364,11 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
         authLink.href = "#";
         setAuthLinkEnabled(false);
         setStatus(authStatus, "muted", "Create PAR first.");
+
+        lastSignedPdfBase64 = null;
+        lastSignedPdfFilename = null;
+        setEnabled(btnDownloadPdf, false);
+        setStatus(downloadStatus, "muted", "");
 
         const file = document.getElementById('pdf').files[0];
         if (!file) {
@@ -493,7 +533,21 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
             });
 
             const text = await res.text();
+
             signOut.textContent = truncateForUi(safeJsonPretty(text));
+
+            const json = JSON.parse(text);
+
+            lastSignedPdfBase64 = json.signedPdf || null;
+            lastSignedPdfFilename = json.responseId ? `signed-${json.responseId}.pdf` : "signed-document.pdf";
+
+            if (!lastSignedPdfBase64) {
+                setEnabled(btnDownloadPdf, false);
+                setStatus(downloadStatus, "err", "No signedPdfBase64 in response");
+            } else {
+                setEnabled(btnDownloadPdf, true);
+                setStatus(downloadStatus, "ok", "Signed PDF ready to download");
+            }
 
             if (!res.ok) {
                 setStatus(signStatus, "err", `ETSI sign failed (HTTP ${res.status})`);
@@ -508,6 +562,19 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
         } finally {
             btnSign.disabled = false;
         }
+
+        btnDownloadPdf.addEventListener('click', () => {
+            if (!lastSignedPdfBase64) {
+                setStatus(downloadStatus, "err", "No signed PDF available — run step 4 first");
+                return;
+            }
+            try {
+                downloadPdfFromBase64(lastSignedPdfBase64, lastSignedPdfFilename);
+                setStatus(downloadStatus, "ok", "Download started");
+            } catch (e) {
+                setStatus(downloadStatus, "err", "Failed to download PDF (base64 decode error?)");
+            }
+        });
     });
 </script>
 

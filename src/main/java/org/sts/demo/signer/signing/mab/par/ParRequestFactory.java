@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 import org.sts.demo.signer.config.QtspProperties;
 import org.sts.demo.signer.oidc.util.OidcRandoms;
 import org.sts.demo.signer.signing.domain.SigningJourney;
-import org.sts.demo.signer.signing.domain.HashAlgorithm;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,18 +18,16 @@ import static org.sts.demo.signer.signing.mab.par.ParPolicy.policyFor;
 public class ParRequestFactory {
     private final QtspProperties props;
 
-    private static final HashAlgorithm HASH_ALGORITHM = HashAlgorithm.SHA256;
-
     public ParRequestFactory(QtspProperties props) {
         this.props = props;
     }
 
-    public ParStartContext buildDemoRequest(SigningJourney journey, String digestB64) {
+    public ParStartContext build(SigningJourney journey, String digestB64) {
         ParPolicy policy = policyFor(journey);
 
         CreateParRequestClaims claims = new CreateParRequestClaims();
         claims.setCredentialID(policy.credentialId());
-        claims.setHashAlgorithmOID(HASH_ALGORITHM.toMab());
+        claims.setHashAlgorithmOID(policy.hashAlgorithm().toMab());
         claims.setDocumentDigests(List.of(
                 new CreateParRequestClaimsDocumentDigestsInner()
                         .hash(digestB64)
@@ -45,7 +41,7 @@ public class ParRequestFactory {
         CreateParRequest req = new CreateParRequest()
                 .clientId(props.getClient().getClientId())
                 .clientSecret(props.getClient().getClientSecret())
-                .redirectUri(URI.create(props.getClient().getRedirectUri().toString()))
+                .redirectUri(props.getClient().getRedirectUri())
                 .state(state)
                 .clientSessionId(clientSessionId)
                 .scope(policy.scope())
@@ -56,6 +52,6 @@ public class ParRequestFactory {
             req.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespace()));
         }
 
-        return new ParStartContext(state, nonce, digestB64, req, HASH_ALGORITHM);
+        return new ParStartContext(state, nonce, req, policy.hashAlgorithm());
     }
 }

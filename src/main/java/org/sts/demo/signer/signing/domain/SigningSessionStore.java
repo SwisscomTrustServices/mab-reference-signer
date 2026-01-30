@@ -9,10 +9,13 @@ public class SigningSessionStore {
     private final ConcurrentHashMap<String, SigningSession> sessions = new ConcurrentHashMap<>();
 
     public void put(SigningSession s) {
-        sessions.put(s.state(), s);
+        SigningSession prev = sessions.putIfAbsent(s.state(), s);
+        if (prev != null) {
+            throw new IllegalStateException("Signing session already exists for state");
+        }
     }
 
-    public SigningSession get(String state) {
-        return sessions.get(state);
+    public SigningSession remove(String state) {
+        return sessions.remove(state);
     }
 }
