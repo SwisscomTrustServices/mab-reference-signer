@@ -14,7 +14,7 @@ public class EtsiSignRequestFactory {
 
     public EtsiSignRequest build(SigningSession session) {
         EtsiSignRequestDocumentDigests digests = new EtsiSignRequestDocumentDigests()
-                .hashAlgorithmOID(session.hashAlg().toEtsi())
+                .hashAlgorithmOID(session.hashAlgorithm().toEtsi())
                 .hashes(List.of(session.digestB64()));
 
         return new EtsiSignRequest()

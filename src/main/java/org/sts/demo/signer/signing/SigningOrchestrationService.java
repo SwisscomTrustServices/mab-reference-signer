@@ -9,10 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.sts.demo.signer.config.QtspProperties;
 import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import org.sts.demo.signer.signing.api.*;
-import org.sts.demo.signer.signing.domain.SigningJourney;
-import org.sts.demo.signer.signing.domain.SigningSession;
-import org.sts.demo.signer.signing.domain.SigningSessionStore;
-import org.sts.demo.signer.signing.domain.SigningSessionValidator;
+import org.sts.demo.signer.signing.domain.*;
 import org.sts.demo.signer.signing.etsi.EtsiResponseMapper;
 import org.sts.demo.signer.signing.etsi.EtsiSignClient;
 import org.sts.demo.signer.signing.etsi.EtsiSignRequestFactory;
@@ -21,10 +18,13 @@ import org.sts.demo.signer.signing.mab.par.ParRequestFactory;
 import org.sts.demo.signer.signing.mab.par.ParStartContext;
 import org.sts.demo.signer.signing.mab.token.TokenClient;
 import org.sts.demo.signer.signing.mab.token.TokenRequestFactory;
-import org.sts.demo.signer.signing.util.DigestUtils;
+import org.sts.demo.signer.signing.pdf.PdfSigningContext;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Objects;
+
+import static org.sts.demo.signer.signing.util.DigestUtils.sha256Base64;
 import static org.sts.demo.signer.signing.util.Redactor.redactJwt;
 
 @Service
@@ -64,46 +64,68 @@ public class SigningOrchestrationService {
     }
 
     public Mono<ParStartResponse> pushPar(MultipartFile pdf, SigningJourney journey) {
-        return Mono.defer(() -> {
-            requirePdf(pdf);
-            return readPdfBytes(pdf)
-                    .map(DigestUtils::sha256Base64)
-                    .map(digestB64 -> parRequestFactory.buildDemoRequest(journey, digestB64))
-                    .flatMap(ctx -> parClient.send(ctx.request())
-                                    .map(par -> {
-                                        persistInitialSession(ctx);
-                                        return toParStartResponse(ctx, par.getRequestUri());
-                                    })
-                    );
-        });
+        requirePdf(pdf);
+        return readPdfBytes(pdf)
+                .flatMap(pdfBytes ->
+                        Mono.fromCallable(() -> PdfSigningContext.prepare(pdfBytes))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .flatMap(pdfSigningContext -> {
+                                    try {
+                                        byte[] toHash = pdfSigningContext.getContentToSign();
+                                        String digestB64 = sha256Base64(toHash);
+                                        var ctx = parRequestFactory.build(journey, digestB64);
+                                        return parClient.send(ctx.request())
+                                                .map(par -> {
+                                                    persistInitialSession(ctx, pdfSigningContext, digestB64);
+                                                    return toParStartResponse(ctx, par.getRequestUri());
+                                                })
+                                                .doOnError(e -> pdfSigningContext.close())
+                                                .doOnCancel(pdfSigningContext::close);
+                                    } catch (Exception e) {
+                                        pdfSigningContext.close();
+                                        return Mono.error(e);
+                                    }
+                                })
+                );
     }
 
     public Mono<TokenExchangeResponse> exchangeAuthCodeForAccessToken(TokenExchangeRequest in) {
-        return Mono.fromCallable(() -> signingSessionValidator.validateAndGet(in.state(), in.nonce()))
-                        .flatMap(session -> {
-                            String code = requireNonBlank(in.code(), "Missing authorization code");
-                            AuthorizationCodeTokenRequest authReq = tokenRequestFactory.buildAuthCode(code);
-                            return tokenClient.exchange(authReq)
-                                    .map(tr -> {
-                                        String sadJwt = requireNonBlank(tr.getAccessToken(), "Token response missing access_token");
-                                        sessions.put(session.withSadJwt(sadJwt));
-                                        return toTokenExchangeResponse(sadJwt, tr);
-                                    });
-                        });
+        return Mono.fromCallable(() -> signingSessionValidator.validateAndTake(in.state(), in.nonce()))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(session -> {
+                    String code = requireNonBlank(in.code(), "Missing authorization code");
+                    AuthorizationCodeTokenRequest authReq = tokenRequestFactory.buildAuthCode(code);
+                    return tokenClient.exchange(authReq)
+                            .map(tr -> {
+                                String sadJwt = requireNonBlank(tr.getAccessToken(), "Token response missing access_token");
+                                sessions.put(session.withSadJwt(sadJwt));
+                                return toTokenExchangeResponse(sadJwt, tr);
+                            });
+                });
     }
 
     public Mono<EtsiSignStartResponse> signEtsi(EtsiSignStartRequest in) {
-        return Mono.fromCallable(() -> signingSessionValidator.validateAndGet(in.state(), in.nonce()))
-                        .flatMap(session -> {
-                            session.requireSadJwt();
-                            EtsiSignRequest req = etsiSignRequestFactory.build(session);
-                            return etsiSignClient.sign(req).map(EtsiResponseMapper::toEmbedResponse);
-                        });
+        return Mono.fromCallable(() -> signingSessionValidator.validateAndTake(in.state(), in.nonce()))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(signingSession -> {
+                    signingSession.requireSadJwt();
+                    EtsiSignRequest req = etsiSignRequestFactory.build(signingSession);
+                    return etsiSignClient.sign(req)
+                            .flatMap(resp ->
+                                    Mono.fromCallable(() -> {
+                                        byte[] cms = EtsiResponseMapper.extractCms(resp);
+                                        byte[] signedPdf = signingSession.document().embedCms(cms);
+                                        return EtsiResponseMapper.toUiResponse(resp, cms.length, signedPdf);
+                                    }).subscribeOn(Schedulers.boundedElastic())
+                            )
+                            .doFinally(sig -> signingSession.document().close());
+                });
     }
 
     private static void requirePdf(MultipartFile pdf) {
-        if (pdf == null || pdf.isEmpty()) {
-            throw new IllegalArgumentException("Missing PDF");
+        Objects.requireNonNull(pdf, "Missing PDF");
+        if (pdf.isEmpty()) {
+            throw new IllegalArgumentException("PDF is empty");
         }
     }
 
@@ -113,13 +135,14 @@ public class SigningOrchestrationService {
                 .onErrorMap(e -> new IllegalArgumentException("Failed to read PDF", e));
     }
 
-    private void persistInitialSession(ParStartContext ctx) {
+    private void persistInitialSession(ParStartContext ctx, DocumentSigningContext document, String digestB64) {
         sessions.put(new SigningSession(
                 ctx.state(),
                 ctx.nonce(),
-                ctx.digestB64(),
-                ctx.hashAlg(),
-                null // sadJwt will be set after token exchange
+                digestB64,
+                ctx.hashAlgorithm(),
+                null, // sadJwt will be set after token exchange
+                document
         ));
     }
 
