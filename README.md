@@ -1,35 +1,49 @@
 # Demo Signer (MAB + ETSI Sign)
 
-This project is a minimal end-to-end demo that shows how to integrate the Swisscom Trust Services Multiple Authentication Broker (MAB) APIs (OIDC + PAR + Token) together with the ETSI Sign API.
+This project is a minimal end-to-end demo that shows how to integrate the Swisscom Trust Services Multiple Authentication Broker (MAB) APIs (OIDC + PAR + Token) and the ETSI Sign API.
 
-It is intentionally built as a reference implementation:
-- Uses mTLS for all protected endpoints 
-- Uses OIDC + PAR (Pushed Authorization Request)
-- Exchanges the authorization code for an access token (SAD JWT)
-- Calls the ETSI signDoc endpoint to sign a document digest 
-- Provides a small browser UI for manual testing (copy/paste auth code)
-
-Out of scope: PDF signature placeholder embedding (removed intentionally to keep the focus on MAB + ETSI flows).
+It is built as a reference implementation for:
+- Using mTLS for all protected endpoints 
+- Calling OIDC + PAR (Pushed Authorization Request)
+- Exchanging the authorization code for an access token (SAD JWT)
+- Calling the ETSI signDoc endpoint to sign a document digest 
+- Providing a small browser UI for manual testing (copy/paste auth code)
+- Preparing a PDF for signature with PDFBox
+- Embedding the returned CMS signature back into the PDF to obtain a final, signed PDF without modifying the signed byte ranges
 
 ## Demo Flow (what it proves)
 
 The demo executes this sequence:
-1.	Backend creates a PAR request (mTLS) and returns an authorizationUrl to the UI
-2.	User opens the authorization URL and completes authentication
-3.	User copies the code from the redirect URL back into the demo UI
-4. Backend exchanges the code for a token (mTLS)
-5. Backend calls ETSI signDoc (mTLS) using:
+1. User uploads a PDF in the UI
+2. Backend prepares the PDF using PDFBox:
+   - Adds a signature placeholder
+   - Computes the exact byte range to be signed
+   - Hashes that byte range
+3. Backend creates a PAR request (mTLS) containing the document digest
+4. User opens the authorization URL and completes authentication
+5. User copies the code from the redirect URL back into the demo UI
+6. Backend exchanges the authorization code for a SAD JWT (mTLS)
+7. Backend calls ETSI signDoc (mTLS) using:
    - the SAD JWT as SAD in the request body
+   - the previously computed document digest
    - the aud claim from the token to determine the correct ETSI sign endpoint
-6.	The UI displays the signing response (SignatureObject etc.)
+8. Backend embeds the returned CMS signature into the PDF
+9. The UI receives:
+   - metadata about the signature
+   - the final signed PDF (Base64), which can be downloaded
 
 ## Tech Stack
 
 - Java 21 
 - Spring Boot (WebFlux)
-- Reactor (Mono)
-- Netty mTLS (ReactorClientHttpConnector)
+- Project Reactor (Mono / reactive flows)
+- Netty HTTP client with mTLS (ReactorClientHttpConnector)
+- Apache PDFBox
+  - External PDF signing (saveIncrementalForExternalSigning)
+  - CMS embedding into PDF signature placeholders
 - OpenAPI-generated clients (MAB + ETSI)
+- Thymeleaf
+  - Minimal browser UI for manual end-to-end testing
 
 ## Prerequisites
 
@@ -89,4 +103,5 @@ This demo is designed so it can be published safely:
 - Session state is stored only in-memory (not production-safe)
 
 Do not use this code as production signing software.
+
 Use it as a reference integration blueprint.
