@@ -1,6 +1,7 @@
 package org.sts.demo.signer.signing.util;
 
 public final class Redactor {
+
     private Redactor() {}
 
     public static String redactBase64(String b64) {
