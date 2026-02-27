@@ -10,7 +10,7 @@ It is built as a reference implementation for:
 - Providing a small browser UI for manual testing (copy/paste auth code)
 - Preparing a PDF for signature with PDFBox
 - Embedding the returned CMS signature back into the PDF to obtain a final, signed PDF without modifying the signed byte ranges
-- 	Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
+- Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
 - Providing a minimal browser UI for manual testing (copy/paste authorization code flow)
 
 ## Demo Flow
