@@ -21,7 +21,7 @@ public final class PdfSigningContext implements DocumentSigningContext {
     private final byte[] contentToSign;
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    private static final int DEFAULT_SIGNATURE_SIZE = 50000;
+    private static final int DEFAULT_SIGNATURE_SIZE = 150000;
 
     private PdfSigningContext(PDDocument document,
                                    ByteArrayOutputStream incrementalOut,

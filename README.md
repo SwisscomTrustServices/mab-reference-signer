@@ -10,10 +10,12 @@ It is built as a reference implementation for:
 - Providing a small browser UI for manual testing (copy/paste auth code)
 - Preparing a PDF for signature with PDFBox
 - Embedding the returned CMS signature back into the PDF to obtain a final, signed PDF without modifying the signed byte ranges
+- Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
+- Providing a minimal browser UI for manual testing (copy/paste authorization code flow)
 
-## Demo Flow (what it proves)
+## Demo Flow
 
-The demo executes this sequence:
+The demo executes the following end-to-end sequence:
 1. User uploads a PDF in the UI
 2. Backend prepares the PDF using PDFBox:
    - Adds a signature placeholder
@@ -28,7 +30,8 @@ The demo executes this sequence:
    - the previously computed document digest
    - the aud claim from the token to determine the correct ETSI sign endpoint
 8. Backend embeds the returned CMS signature into the PDF
-9. The UI receives:
+9. Backend upgrades to PAdES Baseline LT (LTV)
+10. The UI receives:
    - metadata about the signature
    - the final signed PDF (Base64), which can be downloaded
 
@@ -39,11 +42,16 @@ The demo executes this sequence:
 - Project Reactor (Mono / reactive flows)
 - Netty HTTP client with mTLS (ReactorClientHttpConnector)
 - Apache PDFBox
-  - External PDF signing (saveIncrementalForExternalSigning)
+  - External PDF signing
   - CMS embedding into PDF signature placeholders
+  - Incremental update handling
+  - Manual construction of PAdES DSS + VRI structures
+  - PAdES Baseline B-LT (LTV enabled) support
 - OpenAPI-generated clients (MAB + ETSI)
 - Thymeleaf
   - Minimal browser UI for manual end-to-end testing
+  - Manual end-to-end testing
+  - Copy/paste Authorization Code flow
 
 ## Prerequisites
 
