@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -37,10 +38,6 @@ public final class PdfLtvEnhancer {
 
         Objects.requireNonNull(signedPdf, "signedPdf");
 
-        List<byte[]> certs = certsDer == null ? List.of() : certsDer;
-        List<byte[]> ocsps = ocspsDer == null ? List.of() : ocspsDer;
-        List<byte[]> crls  = crlsDer  == null ? List.of() : crlsDer;
-
         try (PDDocument doc = PDDocument.load(signedPdf)) {
 
             // Bind VRI to the newest (last) signature.
@@ -64,40 +61,15 @@ public final class PdfLtvEnhancer {
                 catalog.setItem(DSS, dss);
             }
 
-            COSArray dssCerts = getOrCreateArray(dss, CERTS);
-            COSArray dssOcsps = getOrCreateArray(dss, OCSPS);
-            COSArray dssCrls  = getOrCreateArray(dss, CRLS);
-
             COSDictionary vri = asDict(dss.getDictionaryObject(VRI));
             if (vri == null) {
                 vri = new COSDictionary();
                 dss.setItem(VRI, vri);
             }
 
-            // Add embedded streams and build per-signature arrays referencing those same streams
-            COSArray vriCertArr = new COSArray();
-            for (byte[] der : certs) {
-                if (der == null || der.length == 0) continue;
-                COSStream s = createEmbeddedStream(doc, der);
-                dssCerts.add(s);
-                vriCertArr.add(s);
-            }
-
-            COSArray vriOcspArr = new COSArray();
-            for (byte[] der : ocsps) {
-                if (der == null || der.length == 0) continue;
-                COSStream s = createEmbeddedStream(doc, der);
-                dssOcsps.add(s);
-                vriOcspArr.add(s);
-            }
-
-            COSArray vriCrlArr = new COSArray();
-            for (byte[] der : crls) {
-                if (der == null || der.length == 0) continue;
-                COSStream s = createEmbeddedStream(doc, der);
-                dssCrls.add(s);
-                vriCrlArr.add(s);
-            }
+            COSArray vriCertArr = addValidationObjects(certsDer, doc, dss, CERTS);
+            COSArray vriOcspArr = addValidationObjects(ocspsDer, doc, dss, OCSPS);
+            COSArray vriCrlArr = addValidationObjects(crlsDer, doc, dss, CRLS);
 
             COSDictionary perSig = asDict(vri.getDictionaryObject(vriKey));
             if (perSig == null) perSig = new COSDictionary();
@@ -118,13 +90,27 @@ public final class PdfLtvEnhancer {
             vri.setNeedToBeUpdated(true);
             perSig.setNeedToBeUpdated(true);
 
-            // Debug-only (you can remove once stable)
-            // doc.getDocument().setIsXRefStream(false);
-
             ByteArrayOutputStream out = new ByteArrayOutputStream(signedPdf.length + 128_000);
             doc.saveIncremental(out);
             return out.toByteArray();
         }
+    }
+
+    private static COSArray addValidationObjects(Collection<byte[]> derObjects,
+                                                 PDDocument document,
+                                                 COSDictionary dss,
+                                                 COSName dssEntryName) throws IOException {
+        Collection<byte[]> safeObjects = derObjects == null ? List.of() : derObjects;
+        COSArray dssArray = getOrCreateArray(dss, dssEntryName);
+        COSArray vriArray = new COSArray();
+
+        for (byte[] der : safeObjects) {
+            if (der == null || der.length == 0) continue;
+            COSStream s = createEmbeddedStream(document, der);
+            dssArray.add(s);
+            vriArray.add(s);
+        }
+        return vriArray;
     }
 
     private static COSArray getOrCreateArray(COSDictionary dict, COSName key) {
