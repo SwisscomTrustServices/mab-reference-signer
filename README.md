@@ -46,7 +46,7 @@ To run this demo against Swisscom preprod you need:
 
 - mTLS client certificate + key issued by STS 
 - client_id and client_secret issued by STS 
-- A configured redirect URL (for this demo, a “copy/paste code” workflow is used)
+- A configured redirect URL (either back to this UI or to an inspection endpoint for manual copy/paste)
 
 ## Configuration
 
@@ -153,6 +153,12 @@ Server starts on:
 
 Open the UI in a browser:
 - http://localhost:8081/
+
+### Important: Localhost and Redirect URLs
+
+When running locally, be aware that `localhost` cannot be used as the redirect URI.
+
+For local development testing, use a reverse proxy solution is required.
 
 ## Security Notes (important)
 
