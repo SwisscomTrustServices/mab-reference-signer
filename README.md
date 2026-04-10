@@ -132,10 +132,20 @@ For local development you can also point redirect URI to any endpoint that lets 
 ## Run the Demo
 
 ```bash
-./gradlew bootRun
+make
 ```
 
+This runs `./gradlew bootRun` via the project `Makefile`.
+
 If you are using `.env`, no extra export step is required before running that command.
+
+Additional shortcuts:
+
+```bash
+make build   # ./gradlew build
+make test    # ./gradlew test
+make clean   # ./gradlew clean
+```
 
 Server starts on:
 - http://localhost:8081
