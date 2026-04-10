@@ -58,8 +58,10 @@ For local development, the app also loads a project-root `.env` file automatical
 ### application.yml (defaults)
 
 The repository ships with safe defaults like:
-- QTSP_CLIENT_ID=00000000-0000-0000-0000-000000000000 
-- QTSP_MTLS_BASE_URL=https://example.invalid
+- `CLIENT_ID=00000000-0000-0000-0000-000000000000`
+- `MTLS_BASE_URL=https://example.invalid`
+
+### Variable names the app expects
 
 These are the exact variable names currently referenced by the app:
 
