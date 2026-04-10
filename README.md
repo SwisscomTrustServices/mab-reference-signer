@@ -11,7 +11,6 @@ It is built as a reference implementation for:
 - Preparing a PDF for signature with PDFBox
 - Embedding the returned CMS signature back into the PDF to obtain a final, signed PDF without modifying the signed byte ranges
 - Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
-- Providing a minimal browser UI for manual testing (copy/paste authorization code flow)
 
 ## Demo Flow
 
@@ -23,17 +22,18 @@ The demo executes the following end-to-end sequence:
    - Hashes that byte range
 3. Backend creates a PAR request (mTLS) containing the document digest
 4. User opens the authorization URL and completes authentication
-5. User copies the code from the redirect URL back into the demo UI
-6. Backend exchanges the authorization code for a SAD JWT (mTLS)
-7. Backend calls ETSI signDoc (mTLS) using:
-   - the SAD JWT as SAD in the request body
-   - the previously computed document digest
-   - the aud claim from the token to determine the correct ETSI sign endpoint
-8. Backend embeds the returned CMS signature into the PDF
-9. Backend upgrades to PAdES Baseline LT (LTV)
-10. The UI receives:
-   - metadata about the signature
-   - the final signed PDF (Base64), which can be downloaded
+5. On redirect back, the UI can read `code` + `state` from the callback URL query parameters
+6. User can still copy/paste `code` manually if using an external redirect inspector
+7. Backend exchanges the authorization code for a SAD JWT (mTLS)
+8. Backend calls ETSI signDoc (mTLS) using:
+- the SAD JWT as SAD in the request body
+- the previously computed document digest
+- the aud claim from the token to determine the correct ETSI sign endpoint
+9. Backend embeds the returned CMS signature into the PDF
+10. Backend upgrades to PAdES Baseline LT (LTV)
+11. The UI receives:
+- metadata about the signature
+- the final signed PDF (Base64), which can be downloaded
 
 ## Tech Stack
 
@@ -59,7 +59,7 @@ To run this demo against Swisscom preprod you need:
 
 - mTLS client certificate + key issued by STS 
 - client_id and client_secret issued by STS 
-- A static configured redirect URL (for this demo, a “copy/paste code” workflow is used)
+- A configured redirect URL (either back to this UI or to an inspection endpoint for manual copy/paste)
 
 ## Configuration
 
@@ -152,6 +152,12 @@ Server starts on:
 
 Open the UI in a browser:
 - http://localhost:8081/
+
+### Important: Localhost and Redirect URLs
+
+When running locally, be aware that `localhost` cannot be used as the redirect URI.
+
+For local development testing, use a reverse proxy solution is required.
 
 ## Security Notes (important)
 
