@@ -59,9 +59,46 @@ The repository ships with safe defaults like:
 - QTSP_CLIENT_ID=00000000-0000-0000-0000-000000000000 
 - QTSP_MTLS_BASE_URL=https://example.invalid
 
-### Required environment variables
+These are the exact variable names currently referenced by the app:
 
-Set these before starting the app:
+- `DISCOVERY_PATH`
+- `CLIENT_ID`
+- `CLIENT_SECRET`
+- `REDIRECT_URI`
+- `MTLS_BASE_URL`
+- `MTLS_CLIENT_CERT`
+- `MTLS_CLIENT_KEY`
+- `SPRING_PROFILES_ACTIVE`
+
+They can be set for local development in application-dev.yaml.
+
+### Using a local `.env` file
+
+Create a `.env` file in the project root. You can start from the checked-in example:
+
+```bash
+cp .env.example .env
+```
+
+Sample `.env`:
+
+```dotenv
+DISCOVERY_PATH=https://example.invalid/.well-known/openid-configuration
+CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+CLIENT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+REDIRECT_URI=https://webhook.site/<your-id>
+MTLS_BASE_URL=https://example.invalid
+MTLS_CLIENT_CERT=file:/absolute/path/to/client-cert.pem
+MTLS_CLIENT_KEY=file:/absolute/path/to/client-key.pem
+SPRING_PROFILES_ACTIVE=dev
+```
+
+For `MTLS_CLIENT_CERT` and `MTLS_CLIENT_KEY`, use Spring resource syntax such as `file:/absolute/path/to/client-cert.pem` or `classpath:...`.
+
+### Exported environment variables
+
+If you prefer, you can still export the variables manually before starting the app.
+If the same variable is defined in both places, the exported OS environment variable wins over the value from `.env`. This keeps local defaults convenient while preserving the usual ability to override values per shell or CI job.
 
 ```bash
 export DISCOVERY_PATH="https://example.invalid/.well-known/openid-configuration"
@@ -71,16 +108,42 @@ export CLIENT_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 export REDIRECT_URI="https://webhook.site/<your-id>"
 
 export MTLS_BASE_URL="https://example.invalid"
-export MTLS_CLIENT_CERT="classpath:test-client.pem"
-export MTLS_CLIENT_KEY="classpath:test-client.key"
+export MTLS_CLIENT_CERT="file:/absolute/path/to/client-cert.pem"
+export MTLS_CLIENT_KEY="file:/absolute/path/to/client-key.pem"
 ```
 
 For local development you can also point redirect URI to any endpoint that lets you inspect the URL parameters and copy the code.
 
 ## Run the Demo
 
+The project can be built and run with Gradle. If you prefer shorter, more general commands, the project also supports Makefile.
+
+### Gradle
+
 ```bash
 ./gradlew bootRun
+```
+
+```bash
+./gradlew build
+```
+
+### Makefile
+
+```bash
+make
+```
+
+This runs `./gradlew bootRun` via the project `Makefile`.
+
+If you are using `.env`, no extra export step is required before running that command.
+
+Additional shortcuts:
+
+```bash
+make build   # ./gradlew build
+make test    # ./gradlew test
+make clean   # ./gradlew clean
 ```
 
 Server starts on:
