@@ -51,7 +51,9 @@ To run this demo against Swisscom preprod you need:
 ## Configuration
 
 This project is safe for public repositories and does not contain real secrets.
-All values are injected via environment variables.
+All values are injected via environment variables referenced from `src/main/resources/application.yaml`.
+
+For local development, the app also loads a project-root `.env` file automatically at startup via Spring Boot config import. The `.env` file uses plain `KEY=value` entries, so you can keep local settings in one place instead of exporting them manually in every shell.
 
 ### application.yml (defaults)
 
