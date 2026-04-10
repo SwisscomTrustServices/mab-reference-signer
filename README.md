@@ -59,22 +59,61 @@ To run this demo against Swisscom preprod you need:
 
 - mTLS client certificate + key issued by STS 
 - client_id and client_secret issued by STS 
-- A configured redirect URL (for this demo, a “copy/paste code” workflow is used)
+- A static configured redirect URL (for this demo, a “copy/paste code” workflow is used)
 
 ## Configuration
 
 This project is safe for public repositories and does not contain real secrets.
-All values are injected via environment variables.
+All values are injected via environment variables referenced from `src/main/resources/application.yaml`.
+
+For local development, the app also loads a project-root `.env` file automatically at startup via Spring Boot config import. The `.env` file uses plain `KEY=value` entries, so you can keep local settings in one place instead of exporting them manually in every shell.
 
 ### application.yml (defaults)
 
 The repository ships with safe defaults like:
-- QTSP_CLIENT_ID=00000000-0000-0000-0000-000000000000 
-- QTSP_MTLS_BASE_URL=https://example.invalid
+- `CLIENT_ID=00000000-0000-0000-0000-000000000000`
+- `MTLS_BASE_URL=https://example.invalid`
 
-### Required environment variables
+### Variable names the app expects
 
-Set these before starting the app:
+These are the exact variable names currently referenced by the app:
+
+- `DISCOVERY_PATH`
+- `CLIENT_ID`
+- `CLIENT_SECRET`
+- `REDIRECT_URI`
+- `MTLS_BASE_URL`
+- `MTLS_CLIENT_CERT`
+- `MTLS_CLIENT_KEY`
+- `SPRING_PROFILES_ACTIVE`
+
+### Using a local `.env` file
+
+Create a `.env` file in the project root. You can start from the checked-in example:
+
+```bash
+cp .env.example .env
+```
+
+Sample `.env`:
+
+```dotenv
+DISCOVERY_PATH=https://example.invalid/.well-known/openid-configuration
+CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+CLIENT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+REDIRECT_URI=https://webhook.site/<your-id>
+MTLS_BASE_URL=https://example.invalid
+MTLS_CLIENT_CERT=file:/absolute/path/to/client-cert.pem
+MTLS_CLIENT_KEY=file:/absolute/path/to/client-key.pem
+SPRING_PROFILES_ACTIVE=dev
+```
+
+For `MTLS_CLIENT_CERT` and `MTLS_CLIENT_KEY`, use Spring resource syntax such as `file:/absolute/path/to/client-cert.pem` or `classpath:...`.
+
+### Exported environment variables
+
+If you prefer, you can still export the variables manually before starting the app.
+If the same variable is defined in both places, the exported OS environment variable wins over the value from `.env`. This keeps local defaults convenient while preserving the usual ability to override values per shell or CI job.
 
 ```bash
 export DISCOVERY_PATH="https://example.invalid/.well-known/openid-configuration"
@@ -84,8 +123,8 @@ export CLIENT_SECRET="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 export REDIRECT_URI="https://webhook.site/<your-id>"
 
 export MTLS_BASE_URL="https://example.invalid"
-export MTLS_CLIENT_CERT="classpath:test-client.pem"
-export MTLS_CLIENT_KEY="classpath:test-client.key"
+export MTLS_CLIENT_CERT="file:/absolute/path/to/client-cert.pem"
+export MTLS_CLIENT_KEY="file:/absolute/path/to/client-key.pem"
 ```
 
 For local development you can also point redirect URI to any endpoint that lets you inspect the URL parameters and copy the code.
@@ -95,6 +134,8 @@ For local development you can also point redirect URI to any endpoint that lets 
 ```bash
 ./gradlew bootRun
 ```
+
+If you are using `.env`, no extra export step is required before running that command.
 
 Server starts on:
 - http://localhost:8081
