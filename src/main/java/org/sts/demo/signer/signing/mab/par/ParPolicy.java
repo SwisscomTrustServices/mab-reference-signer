@@ -24,11 +24,6 @@ public record ParPolicy (
                     CreateParRequestClaims.CredentialIDEnum.QUALIFIED4,
                     null,
                     HashAlgorithm.SHA256);
-            case TELCO_ID -> new ParPolicy(
-                    CreateParRequest.ScopeEnum.SIGN,
-                    CreateParRequestClaims.CredentialIDEnum.ADVANCED4,
-                    null,
-                    HashAlgorithm.SHA256);
         };
     }
 }
