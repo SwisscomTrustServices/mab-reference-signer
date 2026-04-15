@@ -48,9 +48,8 @@ The demo executes the following end-to-end sequence:
   - Manual construction of PAdES DSS + VRI structures
   - PAdES Baseline B-LT (LTV enabled) support
 - OpenAPI-generated clients (MAB + ETSI)
-- Thymeleaf
+- Static HTML/CSS/JavaScript UI
   - Minimal browser UI for manual end-to-end testing
-  - Manual end-to-end testing
   - Copy/paste Authorization Code flow
 
 ## Prerequisites
