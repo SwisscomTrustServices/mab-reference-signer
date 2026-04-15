@@ -6,8 +6,10 @@ import org.openapi.mab.model.CreateParRequestLoginHint;
 import org.sts.demo.signer.signing.domain.HashAlgorithm;
 import org.sts.demo.signer.signing.domain.SigningJourney;
 
+import java.util.List;
+
 public record ParPolicy (
-        CreateParRequest.ScopeEnum scope,
+        List<CreateParRequest.ScopeEnum> scopes,
         CreateParRequestClaims.CredentialIDEnum credentialId,
         CreateParRequestLoginHint.NamespaceEnum namespace,
         HashAlgorithm hashAlgorithm
@@ -15,12 +17,12 @@ public record ParPolicy (
     static ParPolicy policyFor(SigningJourney journey) {
         return switch (journey) {
             case FAST_TRACK -> new ParPolicy(
-                    CreateParRequest.ScopeEnum.SIGN,
+                    List.of(CreateParRequest.ScopeEnum.SIGN),
                     CreateParRequestClaims.CredentialIDEnum.ADVANCED4,
                     CreateParRequestLoginHint.NamespaceEnum.PWDOTP,
                     HashAlgorithm.SHA256);
             case QUALIFIED -> new ParPolicy(
-                    CreateParRequest.ScopeEnum.IDENT,
+                    List.of(CreateParRequest.ScopeEnum.IDENT, CreateParRequest.ScopeEnum.SIGN),
                     CreateParRequestClaims.CredentialIDEnum.QUALIFIED4,
                     null,
                     HashAlgorithm.SHA256);
