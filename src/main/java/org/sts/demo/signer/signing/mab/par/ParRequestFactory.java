@@ -38,20 +38,21 @@ public class ParRequestFactory {
         String nonce = OidcRandoms.nonce();
         String clientSessionId = UUID.randomUUID().toString();
 
-        CreateParRequest req = new CreateParRequest()
+        CreateParRequest base = new CreateParRequest()
                 .clientId(props.getClient().getClientId())
                 .clientSecret(props.getClient().getClientSecret())
                 .redirectUri(props.getClient().getRedirectUri())
                 .state(state)
                 .clientSessionId(clientSessionId)
-                .scope(policy.scope())
+                .scope(null)
                 .claims(claims)
                 .identMethods(null);
 
         if (policy.namespace() != null) {
-            req.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespace()));
+            base.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespace()));
         }
 
+        ParRequestPayload req = new ParRequestPayload(base, policy.scopes());
         return new ParStartContext(state, nonce, req, policy.hashAlgorithm());
     }
 }

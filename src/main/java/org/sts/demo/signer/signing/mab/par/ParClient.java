@@ -2,7 +2,6 @@ package org.sts.demo.signer.signing.mab.par;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.openapi.mab.invoker.ApiClient;
-import org.openapi.mab.model.CreateParRequest;
 import org.openapi.mab.model.ParResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ public class ParClient {
         this.endpoints = endpoints;
     }
 
-    public Mono<ParResponse> send(CreateParRequest req) {
+    public Mono<ParResponse> send(ParRequestPayload req) {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 
