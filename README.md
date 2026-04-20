@@ -4,8 +4,10 @@ This project is a minimal end-to-end demo that shows how to integrate the Swissc
 
 It is built as a reference implementation for:
 - Using mTLS for all protected endpoints 
-- Calling OIDC + PAR (Pushed Authorization Request)
+- Calling OIDC + PAR
+- Calling OIDC + CIBA
 - Exchanging the authorization code for an access token (SAD JWT)
+- Polling CIBA token endpoint for an access token (SAD JWT)
 - Calling the ETSI signDoc endpoint to sign a document digest 
 - Providing a small browser UI for manual testing (copy/paste auth code)
 - Preparing a PDF for signature with PDFBox
@@ -13,7 +15,7 @@ It is built as a reference implementation for:
 - Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
 - Providing a minimal browser UI for manual testing (copy/paste authorization code flow)
 
-## Demo Flow
+## PAR Flow
 
 The demo executes the following end-to-end sequence:
 1. User uploads a PDF in the UI
