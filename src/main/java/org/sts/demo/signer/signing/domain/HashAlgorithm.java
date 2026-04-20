@@ -20,12 +20,10 @@ public enum HashAlgorithm {
         this.mabOid = mabOid;
     }
 
-    /** ETSI Sign API enum */
     public EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum toEtsi() {
         return etsiOid;
     }
 
-    /** MAB / PAR API enum */
     public CreateParRequestClaims.HashAlgorithmOIDEnum toMab() {
         return mabOid;
     }

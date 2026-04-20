@@ -4,58 +4,117 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Demo Signer</title>
-    <link rel="stylesheet" href="/styles.css"/>
+    <link rel="stylesheet" href="/styles.css?v=20260420-2"/>
 </head>
 <body>
 
 <h1>Demo Signer</h1>
-<p class="muted">
-    End-to-end demo:
-    <b>1)</b> create PAR,
-    <b>2)</b> open QTSP Auth (new tab),
-    <b>3)</b> paste <code>code</code> and exchange for token,
-    <b>4)</b> ETSI sign the hash.
-</p>
 
-<!-- Step 1 -->
+<div class="tabBar">
+    <button type="button" id="tabPar" class="tabBtn active">PAR</button>
+    <button type="button" id="tabCiba" class="tabBtn">CIBA</button>
+</div>
+
+<!-- Step 0: choose the journey -->
 <div class="card">
-    <div class="stepGrid">
-        <div class="stepLeft">
-            <h3 class="mt0">1) Create PAR</h3>
 
-            <form id="parForm">
-                <label for="pdf">PDF</label>
-                <input id="pdf" name="pdf" type="file" accept="application/pdf" required/>
-                <br><br>
-                <label>Signature Journey</label>
+    <div id="panelParJourneys" class="tabPanel active">
+        <div class="stepGrid">
+            <div class="stepLeft">
+                <label>Journey</label>
                 <div class="journeys">
                     <p class="small mt025">
                         <label class="journey-item">
-                            <input type="radio" name="journey" value="FAST_TRACK" checked/>
-                            Fast-track (zertES "One-Shot AES with PWOTP")
+                            <input type="radio" name="journey" value="PAR_AES_FAST_TRACK" checked/>
+                            Advanced (Fastrack/One-Shot AES with PWOTP Auth)
                         </label>
                         <label class="journey-item">
-                            <input type="radio" name="journey" value="QUALIFIED"/>
-                            Qualified (zertES "Repetitive QES")
+                            <input type="radio" name="journey" value="PAR_QES_REP"/>
+                            Qualified (Repetitive QES with Passkey Auth and Fidentity Auto-Ident)
                         </label>
                     </p>
                 </div>
-
-                <div class="row mt1">
-                    <button type="submit" id="btnPar">Create PAR</button>
-                    <span id="parStatus" class="muted"></span>
-                </div>
-            </form>
+            </div>
         </div>
-        <div class="stepRight">
-            <h4>PAR response</h4>
-            <pre id="parOut">{}</pre>
+    </div>
+
+    <div id="panelCibaJourneys" class="tabPanel hidden">
+        <div class="stepGrid">
+            <div class="stepLeft">
+                <label>Journey</label>
+                <div class="journeys">
+                    <p class="small mt025">
+                        <label class="journey-item">
+                            <input type="radio" name="cibaJourney" value="CIBA_AES" checked/>
+                            Advanced (Repetitive AES with Mobile Id and Fidentity Auto-Ident)
+                        </label>
+                        <label class="journey-item">
+                            <input type="radio" name="cibaJourney" value="CIBA_QES"/>
+                            Qualified (Repetitive QES with Mobile Id and Fidentity Auto-Ident)
+                        </label>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- PAR step 1 -->
+<div id="parStep1Card" class="card">
+    <div id="panelPar" class="tabPanel active">
+        <div class="stepGrid">
+            <div class="stepLeft">
+                <h3 class="mt0">1) Start PAR Auth</h3>
+
+                <form id="parForm">
+
+                    <input id="pdf" name="pdf" type="file" accept="application/pdf" required/>
+
+                    <div class="row mt1">
+                        <button type="submit" id="btnPar">Send PAR</button>
+                        <span id="parStatus" class="muted"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="stepRight">
+                <h4>PAR response</h4>
+                <pre id="parOut">{}</pre>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Step 2 -->
-<div class="card">
+<!-- CIBA Step 1 -->
+<div id="cibaStep1Card" class="card hidden">
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 class="mt0">1) Check onboarding (Webfinger)</h3>
+            <form id="cibaForm">
+                <label for="cibaIdentifier">Swiss phone number</label>
+                <input id="cibaIdentifier" name="identifier" type="text" placeholder="e.g. +4179..."
+                       pattern="[+]?[1-9][0-9]{6,15}"
+                       title="Use E.164-like format, e.g. +41791234567"
+                       inputmode="tel"
+                       required/>
+                <div class="row mt025">
+                    <span id="cibaIdentifierStatus" class="muted"></span>
+                </div>
+
+                <div class="row mt1">
+                    <button type="button" id="btnCibaCheck">Check</button>
+                </div>
+            </form>
+        </div>
+        <div class="stepRight">
+            <h4>Webfinger response</h4>
+            <pre id="cibaWebfingerOut">{}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- PAR Step 2 -->
+<div id="step2Card" class="card">
     <div class="stepGrid">
         <div class="stepLeft">
             <h3 class="mt0">2) Redirect user to QTSP Auth</h3>
@@ -70,10 +129,6 @@
                 </a>
                 <span id="authStatus" class="muted">Create PAR first.</span>
             </div>
-
-            <div class="hint small mt1">
-                Tip: Manual copy/paste avoids ngrok/webhook dependencies for this demo.
-            </div>
         </div>
         <div class="stepRight">
             <h4>What to copy</h4>
@@ -83,8 +138,32 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
     </div>
 </div>
 
-<!-- Step 3 -->
-<div class="card">
+<!-- CIBA Step 2 -->
+<div id="cibaStep2Card" class="card hidden">
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 class="mt0">2) Start CIBA Auth</h3>
+            <p class="muted small mt025">Uses the CIBA journey selected in step 0.</p>
+
+            <div id="cibaPdfGroup" class="hidden">
+                <label for="cibaPdf">PDF</label>
+                <input id="cibaPdf" name="pdf" type="file" accept="application/pdf"/>
+            </div>
+
+            <div class="row mt1">
+                <button type="button" id="btnCibaAuth">Start CIBA auth</button>
+                <span id="cibaStatus" class="muted"></span>
+            </div>
+        </div>
+        <div class="stepRight">
+            <h4>CIBA response</h4>
+            <pre id="cibaOut">{}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- PAR Step 3 -->
+<div id="tokenCard" class="card">
     <div class="stepGrid">
         <div class="stepLeft">
             <h3 class="mt0">3) Exchange code for token</h3>
@@ -106,14 +185,32 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
     </div>
 </div>
 
-<!-- Step 4 -->
+<!-- CIBA Step 3 -->
+<div id="cibaStep3Card" class="card hidden">
+    <div class="stepGrid">
+        <div class="stepLeft">
+            <h3 class="mt0">3) Start CIBA token polling</h3>
+            <div class="row mt1">
+                <button type="button" id="btnCibaPollToken" class="disabled" disabled>Start CIBA token polling</button>
+                <button type="button" id="btnCibaStopPoll" class="hidden">Stop polling</button>
+                <span id="cibaPollStatus" class="muted"></span>
+                <span id="cibaPollCountdown" class="muted small"></span>
+            </div>
+        </div>
+        <div class="stepRight">
+            <h4>Token response</h4>
+            <pre id="cibaTokenOut">{}</pre>
+        </div>
+    </div>
+</div>
+
+<!-- Common Step 4 -->
 <div class="card">
     <div class="stepGrid">
         <div class="stepLeft">
             <h3 class="mt0">4) ETSI Sign (sign a document digest)</h3>
             <p class="muted small mt025">
-                Uses the <code>access_token</code> (SAD JWT) from step 3 and the stored <code>state/nonce</code> from
-                step 1.
+                Uses the <code>access_token</code> (SAD JWT) from step 3 and the stored <code>state/nonce</code>.
             </p>
 
             <div class="row mt1">
@@ -131,7 +228,7 @@ Copy the "code" query parameter from the URL and paste it in step 3.</pre>
     </div>
 </div>
 
-<script src="/app.js"></script>
+<script type="module" src="/app.js?v=20260420-1"></script>
 
 </body>
 </html>

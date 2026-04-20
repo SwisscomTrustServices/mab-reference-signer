@@ -20,7 +20,7 @@ public class EtsiSignRequestFactory {
         return new EtsiSignRequest()
                 .SAD(session.sadJwt())
                 .documentDigests(digests)
-                .credentialID(EtsiSignRequest.CredentialIDEnum.ADVANCED4)
+                .credentialID(session.credentialId().toEtsi())
                 .signatureFormat(EtsiSignRequest.SignatureFormatEnum.P);
     }
 }

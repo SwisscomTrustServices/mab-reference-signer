@@ -59,6 +59,9 @@ tasks.register("generateMabClient", GenerateTask) {
             dateLibrary: "java8",
             useJakartaEe: "true"
     ]
+    globalProperties = [
+            skipFormModel: "false"
+    ]
 }
 
 tasks.register("generateEtsiClient", GenerateTask) {

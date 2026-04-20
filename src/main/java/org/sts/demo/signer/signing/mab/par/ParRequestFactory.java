@@ -1,18 +1,16 @@
 package org.sts.demo.signer.signing.mab.par;
 
-import org.openapi.mab.model.CreateParRequest;
-import org.openapi.mab.model.CreateParRequestClaims;
-import org.openapi.mab.model.CreateParRequestClaimsDocumentDigestsInner;
-import org.openapi.mab.model.CreateParRequestLoginHint;
+import org.openapi.mab.model.*;
 import org.springframework.stereotype.Component;
 import org.sts.demo.signer.config.QtspProperties;
-import org.sts.demo.signer.oidc.util.OidcRandoms;
+import org.sts.demo.signer.signing.util.StateNonceGenerator;
 import org.sts.demo.signer.signing.domain.SigningJourney;
+import org.sts.demo.signer.signing.mab.AuthPolicy;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.sts.demo.signer.signing.mab.par.ParPolicy.policyFor;
+import static org.sts.demo.signer.signing.mab.AuthPolicy.policyFor;
 
 @Component
 public class ParRequestFactory {
@@ -23,19 +21,19 @@ public class ParRequestFactory {
     }
 
     public ParStartContext build(SigningJourney journey, String digestB64) {
-        ParPolicy policy = policyFor(journey);
+        AuthPolicy authPolicy = policyFor(journey);
 
         CreateParRequestClaims claims = new CreateParRequestClaims();
-        claims.setCredentialID(policy.credentialId());
-        claims.setHashAlgorithmOID(policy.hashAlgorithm().toMab());
+        claims.setCredentialID(authPolicy.credentialId().toMab());
+        claims.setHashAlgorithmOID(authPolicy.hashAlgorithm().toMab());
         claims.setDocumentDigests(List.of(
                 new CreateParRequestClaimsDocumentDigestsInner()
                         .hash(digestB64)
                         .label("Document-1")
         ));
 
-        String state = OidcRandoms.state();
-        String nonce = OidcRandoms.nonce();
+        String state = StateNonceGenerator.state();
+        String nonce = StateNonceGenerator.nonce();
         String clientSessionId = UUID.randomUUID().toString();
 
         CreateParRequest base = new CreateParRequest()
@@ -48,11 +46,22 @@ public class ParRequestFactory {
                 .claims(claims)
                 .identMethods(null);
 
-        if (policy.namespace() != null) {
-            base.setLoginHint(new CreateParRequestLoginHint().namespace(policy.namespace()));
+        if (authPolicy.identMethodType() != null) {
+            base.setIdentMethods(List.of(
+                    new CreateParRequestIdentMethodsInner()
+                            .type(authPolicy.identMethodType())
+            ));
         }
 
-        ParRequestPayload req = new ParRequestPayload(base, policy.scopes());
-        return new ParStartContext(state, nonce, req, policy.hashAlgorithm());
+        if (authPolicy.namespace() != null) {
+            base.setLoginHint(new CreateParRequestLoginHint().namespace(authPolicy.namespace()));
+        }
+
+        List<CreateParRequest.ScopeEnum> scopes = authPolicy.scopes().stream()
+                .map(CreateParRequest.ScopeEnum::fromValue)
+                .toList();
+
+        ParRequestPayload req = new ParRequestPayload(base, scopes);
+        return new ParStartContext(state, nonce, req, authPolicy.hashAlgorithm(), authPolicy.credentialId());
     }
 }

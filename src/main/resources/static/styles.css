@@ -88,6 +88,27 @@ input[type="text"] {
     margin-top: 1rem;
 }
 
+.tabBar {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.tabBtn {
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.tabBtn.active {
+    background: #eef4ff;
+    border-color: #95b8ff;
+}
+
+.tabPanel.active {
+    display: block;
+}
+
 .stepGrid {
     display: grid;
     grid-template-columns: 1.1fr 1.3fr;
@@ -109,6 +130,35 @@ input[type="text"] {
 
 .stepRight pre {
     max-height: 280px;
+}
+
+#cibaPollCountdown.polling-active {
+    display: inline-block;
+    padding: .08rem .45rem;
+    border-radius: 999px;
+    color: #1e40af;
+    background: #dbeafe;
+    font-weight: 700;
+    animation: cibaPollPulse .9s ease-in-out infinite;
+}
+
+@keyframes cibaPollPulse {
+    0%, 100% {
+        opacity: .45;
+        transform: scale(0.98);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #cibaPollCountdown.polling-active {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
 }
 
 @media (max-width: 980px) {

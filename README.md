@@ -35,6 +35,20 @@ The demo executes the following end-to-end sequence:
    - metadata about the signature
    - the final signed PDF (Base64), which can be downloaded
 
+## CIBA Flow (UI-driven polling)
+
+In addition to the PAR authorization-code flow above, the demo also supports a CIBA flow in the browser UI:
+
+1. User selects a CIBA family journey (`CIBA_AES` or `CIBA_QES`)
+2. UI calls Webfinger check (`/api/ciba/webfinger`)
+3. Backend starts CIBA auth (`/api/ciba/auth`) with journey mapping:
+   - not onboarded -> `*_IDENT`
+   - onboarded -> `*_SIGN`
+4. UI starts token polling against `/api/ciba/token`
+   - polling loop runs in the UI
+   - backend returns `status` (`PENDING` or `READY`) and always includes `nextPollInSec`
+5. On `READY`, UI stores the SAD token and the flow continues with ETSI signing (step 4 in the UI)
+
 ## Tech Stack
 
 - Java 21 

@@ -31,7 +31,7 @@ public class ParClient {
         this.endpoints = endpoints;
     }
 
-    public Mono<ParResponse> send(ParRequestPayload req) {
+    public Mono<ParResponse> authenticate(ParRequestPayload req) {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 

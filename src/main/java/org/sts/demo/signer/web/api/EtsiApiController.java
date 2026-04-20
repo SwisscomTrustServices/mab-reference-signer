@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.sts.demo.signer.signing.SigningOrchestrationService;
-import org.sts.demo.signer.signing.api.EtsiSignStartRequest;
-import org.sts.demo.signer.signing.api.EtsiSignStartResponse;
+import org.sts.demo.signer.signing.EtsiSignService;
+import org.sts.demo.signer.web.dto.EtsiSignStartRequest;
+import org.sts.demo.signer.web.dto.EtsiSignStartResponse;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api")
 public class EtsiApiController {
-    private final SigningOrchestrationService signing;
+    private final EtsiSignService etsiSignService;
 
-    public EtsiApiController(SigningOrchestrationService signing) {
-        this.signing = signing;
+    public EtsiApiController(EtsiSignService etsiSignService) {
+        this.etsiSignService = etsiSignService;
     }
 
     @PostMapping(
@@ -26,6 +26,6 @@ public class EtsiApiController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<EtsiSignStartResponse> sign(@Valid @RequestBody EtsiSignStartRequest req) {
-        return signing.signEtsi(req);
+        return etsiSignService.signEtsi(req);
     }
 }
