@@ -9,6 +9,8 @@ qtsp:
     base-url: "${MTLS_BASE_URL:https://example.invalid}"
     client-cert: "${MTLS_CLIENT_CERT:classpath:demo-client.pem}"
     client-key: "${MTLS_CLIENT_KEY:classpath:demo-client.key}"
+  ciba:
+    jwt-shared-secret: "${CIBA_JWT_SHARED_SECRET:change-this-shared-secret}"
 
 server:
   port: 8081

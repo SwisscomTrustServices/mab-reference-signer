@@ -43,4 +43,35 @@ public class OidcEndpoints {
         URI mtlsBase = props.getMtls().getBaseUrl();
         return mtlsBase.toString().replaceAll("/+$","") + discoveredUri.getPath();
     }
+
+    public String cibaAuthUri() {
+        URI mtlsBase = props.getMtls().getBaseUrl();
+        return mtlsBase.toString().replaceAll("/+$", "") +
+                "/api/auth/realms/broker/protocol/openid-connect/oauth-authorize";
+    }
+
+    public String cibaTokenUri() {
+        URI mtlsBase = props.getMtls().getBaseUrl();
+        return mtlsBase.toString().replaceAll("/+$", "") +
+                "/api/auth/realms/broker/protocol/openid-connect/oauth-token";
+    }
+
+    public String tacUri() {
+        String url = cache.get().termsAndConditionsEndpoint();
+        if (url == null || url.isBlank()) {
+            throw new IllegalStateException("OIDC discovery missing terms_and_conditions_endpoint");
+        }
+        return url;
+    }
+
+    public String webfingerUri() {
+        String url = cache.get().resolvedWebfingerEndpoint();
+        if (url == null || url.isBlank()) {
+            throw new IllegalStateException("OIDC discovery missing webfinger_endpoint");
+        }
+        URI discoveredUri = URI.create(url);
+
+        URI mtlsBase = props.getMtls().getBaseUrl();
+        return mtlsBase.toString().replaceAll("/+$", "") + discoveredUri.getPath();
+    }
 }

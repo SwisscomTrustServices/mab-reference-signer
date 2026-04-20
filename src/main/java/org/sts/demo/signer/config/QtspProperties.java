@@ -1,6 +1,7 @@
 package org.sts.demo.signer.config;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -21,6 +22,9 @@ public class QtspProperties {
 
     @Valid @NotNull
     private Mtls mtls = new Mtls();
+
+    @Valid @NotNull
+    private Ciba ciba = new Ciba();
 
     public static class Oidc {
         @NotNull
@@ -59,10 +63,20 @@ public class QtspProperties {
         public void setClientKey(Resource clientKey) { this.clientKey = clientKey; }
     }
 
+    public static class Ciba {
+        @NotBlank
+        private String jwtSharedSecret;
+
+        public String getJwtSharedSecret() { return jwtSharedSecret; }
+        public void setJwtSharedSecret(String jwtSharedSecret) { this.jwtSharedSecret = jwtSharedSecret; }
+    }
+
     public Oidc getOidc() { return oidc; }
     public void setOidc(Oidc oidc) { this.oidc = oidc; }
     public Client getClient() { return client; }
     public void setClient(Client client) { this.client = client; }
     public Mtls getMtls() { return mtls; }
     public void setMtls(Mtls mtls) { this.mtls = mtls; }
+    public Ciba getCiba() { return ciba; }
+    public void setCiba(Ciba ciba) { this.ciba = ciba; }
 }

@@ -18,4 +18,25 @@ public class SigningSessionStore {
     public SigningSession remove(String state) {
         return sessions.remove(state);
     }
+
+    public SigningSession get(String state) {
+        return sessions.get(state);
+    }
+
+    public void putInitial(String state,
+                           String nonce,
+                           String digestB64,
+                           HashAlgorithm hashAlgorithm,
+                           CredentialId credentialId,
+                           DocumentSigningContext document) {
+        put(new SigningSession(
+                state,
+                nonce,
+                digestB64,
+                hashAlgorithm,
+                credentialId,
+                null,
+                document
+        ));
+    }
 }

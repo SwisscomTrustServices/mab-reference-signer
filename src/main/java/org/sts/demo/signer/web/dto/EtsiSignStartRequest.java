@@ -1,9 +1,8 @@
-package org.sts.demo.signer.signing.api;
+package org.sts.demo.signer.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record TokenExchangeRequest(
-        @NotBlank String code,
+public record EtsiSignStartRequest (
         @NotBlank String state,
         @NotBlank String nonce
 ) {}

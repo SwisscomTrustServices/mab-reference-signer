@@ -1,6 +1,7 @@
 package org.sts.demo.signer.oidc.util;
 
 import org.junit.jupiter.api.Test;
+import org.sts.demo.signer.signing.util.StateNonceGenerator;
 
 import java.util.Base64;
 import java.util.HashSet;
@@ -9,14 +10,14 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OidcRandomsTest {
+class StateNonceGeneratorTest {
 
     private static final Pattern BASE64URL_NO_PADDING =
             Pattern.compile("^[A-Za-z0-9_-]+$");
 
     @Test
     void state_isBase64UrlNoPadding_andDecodesTo16Bytes() {
-        String s = OidcRandoms.state();
+        String s = StateNonceGenerator.state();
 
         assertNotNull(s);
         assertFalse(s.isEmpty());
@@ -30,7 +31,7 @@ class OidcRandomsTest {
 
     @Test
     void nonce_isBase64UrlNoPadding_andDecodesTo16Bytes() {
-        String n = OidcRandoms.nonce();
+        String n = StateNonceGenerator.nonce();
 
         assertNotNull(n);
         assertFalse(n.isEmpty());
@@ -49,7 +50,7 @@ class OidcRandomsTest {
 
         Set<String> seen = new HashSet<>(samples);
         for (int i = 0; i < samples; i++) {
-            String s = OidcRandoms.state();
+            String s = StateNonceGenerator.state();
             assertTrue(seen.add(s), "duplicate state at iteration " + i);
         }
     }
@@ -60,7 +61,7 @@ class OidcRandomsTest {
 
         Set<String> seen = new HashSet<>(samples);
         for (int i = 0; i < samples; i++) {
-            String n = OidcRandoms.nonce();
+            String n = StateNonceGenerator.nonce();
             assertTrue(seen.add(n), "duplicate nonce at iteration " + i);
         }
     }
@@ -68,8 +69,8 @@ class OidcRandomsTest {
     @Test
     void stateAndNonce_areDifferentMostOfTheTime() {
         // Extremely low probability of failing unless something breaks.
-        String state = OidcRandoms.state();
-        String nonce = OidcRandoms.nonce();
+        String state = StateNonceGenerator.state();
+        String nonce = StateNonceGenerator.nonce();
         assertNotEquals(state, nonce, "state and nonce should almost never be equal");
     }
 

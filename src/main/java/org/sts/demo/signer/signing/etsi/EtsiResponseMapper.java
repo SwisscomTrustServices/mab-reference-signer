@@ -1,7 +1,7 @@
 package org.sts.demo.signer.signing.etsi;
 
 import org.openapi.etsi.model.EtsiSignResponse;
-import org.sts.demo.signer.signing.api.EtsiSignStartResponse;
+import org.sts.demo.signer.web.dto.EtsiSignStartResponse;
 
 import java.util.Base64;
 

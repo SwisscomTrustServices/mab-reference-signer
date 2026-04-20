@@ -5,12 +5,13 @@ public record SigningSession (
     String nonce,
     String digestB64,
     HashAlgorithm hashAlgorithm,
+    CredentialId credentialId,
     String sadJwt,
     DocumentSigningContext document
 ) {
     public SigningSession withSadJwt(String sadJwt) {
         if (sadJwt == null || sadJwt.isBlank()) throw new IllegalArgumentException("sadJwt is required");
-        return new SigningSession(state, nonce, digestB64, hashAlgorithm, sadJwt.trim(), document);
+        return new SigningSession(state, nonce, digestB64, hashAlgorithm, credentialId, sadJwt.trim(), document);
     }
 
     public void requireSadJwt() {
@@ -24,6 +25,7 @@ public record SigningSession (
         if (nonce == null || nonce.isBlank()) throw new IllegalArgumentException("nonce is required");
         if (digestB64 == null || digestB64.isBlank()) throw new IllegalArgumentException("digestB64 is required");
         if (hashAlgorithm == null) throw new IllegalArgumentException("hashAlg is required");
+        if (credentialId == null) throw new IllegalArgumentException("credentialId is required");
         if (document == null) throw new IllegalArgumentException("document is required");
     }
 }

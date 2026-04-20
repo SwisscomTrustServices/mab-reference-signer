@@ -9,7 +9,7 @@ class SigningSessionStoreTest {
     @Test
     void putIfAbsent_shouldStore() {
         SigningSessionStore store = new SigningSessionStore();
-        SigningSession s = new SigningSession("state1", "nonce1", "digest", HashAlgorithm.SHA256, null, new NoopDoc());
+        SigningSession s = new SigningSession("state1", "nonce1", "digest", HashAlgorithm.SHA256, CredentialId.ADVANCED4, null, new NoopDoc());
         store.put(s);
         SigningSession removed = store.remove("state1");
         assertNotNull(removed);

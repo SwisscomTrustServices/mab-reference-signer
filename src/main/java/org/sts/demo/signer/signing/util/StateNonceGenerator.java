@@ -1,12 +1,12 @@
-package org.sts.demo.signer.oidc.util;
+package org.sts.demo.signer.signing.util;
 
 import java.security.SecureRandom;
 import java.util.Base64;
 
-public final class OidcRandoms {
+public final class StateNonceGenerator {
     private static final SecureRandom RNG = new SecureRandom();
 
-    private OidcRandoms() {}
+    private StateNonceGenerator() {}
 
     public static String state() { return randomBase64Url(); }
     public static String nonce() { return randomBase64Url(); }

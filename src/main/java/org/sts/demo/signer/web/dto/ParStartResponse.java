@@ -1,4 +1,4 @@
-package org.sts.demo.signer.signing.api;
+package org.sts.demo.signer.web.dto;
 
 public record ParStartResponse(
         String authorizationUrl,
