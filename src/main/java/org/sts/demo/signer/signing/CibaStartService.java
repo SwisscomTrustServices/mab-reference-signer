@@ -50,7 +50,7 @@ public class CibaStartService {
         return startCibaIdentAuth(journey, trimmedIdentifier);
     }
 
-    public Mono<CibaStartResponse> startCibaIdentAuth(SigningJourney journey, String identifier) {
+    private Mono<CibaStartResponse> startCibaIdentAuth(SigningJourney journey, String identifier) {
         var ctx = cibaRequestFactory.buildIdent(journey, identifier);
         return cibaClient.authenticate(ctx.request())
                 .map(resp -> {
@@ -66,7 +66,7 @@ public class CibaStartService {
                 });
     }
 
-    public Mono<CibaStartResponse> startCibaSignAuth(MultipartFile pdf, SigningJourney journey, String identifier) {
+    private Mono<CibaStartResponse> startCibaSignAuth(MultipartFile pdf, SigningJourney journey, String identifier) {
         requirePdf(pdf);
         return readPdfBytes(pdf)
                 .flatMap(pdfBytes ->

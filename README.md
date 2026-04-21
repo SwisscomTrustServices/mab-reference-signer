@@ -15,41 +15,13 @@ It is built as a reference implementation for:
 - Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
 - Providing a minimal browser UI for manual testing (copy/paste authorization code flow)
 
-## PAR Flow
+## PAR Flow Sequence Diagram
 
-The demo executes the following end-to-end sequence:
-1. User uploads a PDF in the UI
-2. Backend prepares the PDF using PDFBox:
-   - Adds a signature placeholder
-   - Computes the exact byte range to be signed
-   - Hashes that byte range
-3. Backend creates a PAR request (mTLS) containing the document digest
-4. User opens the authorization URL and completes authentication
-5. User copies the code from the redirect URL back into the demo UI
-6. Backend exchanges the authorization code for a SAD JWT (mTLS)
-7. Backend calls ETSI signDoc (mTLS) using:
-   - the SAD JWT as SAD in the request body
-   - the previously computed document digest
-   - the aud claim from the token to determine the correct ETSI sign endpoint
-8. Backend embeds the returned CMS signature into the PDF
-9. Backend upgrades to PAdES Baseline LT (LTV)
-10. The UI receives:
-   - metadata about the signature
-   - the final signed PDF (Base64), which can be downloaded
+![PAR Flow](docs/par-flow.png)
 
-## CIBA Flow (UI-driven polling)
+## CIBA Flow Sequence Diagram
 
-In addition to the PAR authorization-code flow above, the demo also supports a CIBA flow in the browser UI:
-
-1. User selects a CIBA family journey (`CIBA_AES` or `CIBA_QES`)
-2. UI calls Webfinger check (`/api/ciba/webfinger`)
-3. Backend starts CIBA auth (`/api/ciba/auth`) with journey mapping:
-   - not onboarded -> `*_IDENT`
-   - onboarded -> `*_SIGN`
-4. UI starts token polling against `/api/ciba/token`
-   - polling loop runs in the UI
-   - backend returns `status` (`PENDING` or `READY`) and always includes `nextPollInSec`
-5. On `READY`, UI stores the SAD token and the flow continues with ETSI signing (step 4 in the UI)
+![CIBA Flow](docs/ciba-flow.png)
 
 ## Tech Stack
 

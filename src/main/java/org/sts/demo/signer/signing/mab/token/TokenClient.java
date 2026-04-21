@@ -3,17 +3,12 @@ package org.sts.demo.signer.signing.mab.token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.openapi.mab.invoker.ApiClient;
-import org.openapi.mab.model.AuthorizationCodeTokenRequest;
-import org.openapi.mab.model.OauthTokenErrorResponse;
-import org.openapi.mab.model.OauthTokenRequest;
-import org.openapi.mab.model.OauthTokenSignResponse;
-import org.openapi.mab.model.TokenResponse;
+import org.openapi.mab.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,7 +16,8 @@ import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import org.sts.demo.signer.signing.util.JsonNullPruner;
 import reactor.core.publisher.Mono;
 
-import static org.sts.demo.signer.signing.util.FormPrettyPrinter.prettyPrint;
+import static org.sts.demo.signer.signing.util.FormDataConverter.prettyPrint;
+import static org.sts.demo.signer.signing.util.FormDataConverter.toFormData;
 
 @Component
 public class TokenClient {
@@ -71,13 +67,8 @@ public class TokenClient {
                 });
     }
 
-    public Mono<OauthTokenSignResponse> pollCibaToken(OauthTokenRequest req) {
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("client_id", req.getClientId().toString());
-        form.add("client_secret", req.getClientSecret().toString());
-        form.add("grant_type", req.getGrantType().getValue());
-        form.add("auth_req_id", req.getAuthReqId().toString());
-
+    public Mono<OauthTokenSignResponse> poll(OauthTokenRequest req) {
+        MultiValueMap<String, String> form = toFormData(apiClient.getObjectMapper(), req);
         final String prettyForm = prettyPrint(objectMapper, form);
 
         return Mono.defer(() -> {

@@ -1,0 +1,67 @@
+@startuml PAR Flow
+skinparam responseMessageBelowArrow true
+
+actor       User   as user
+participant Browser as browser
+participant "Demo Backend" as be
+participant "MAB API" as mab
+participant "ETSI Sign API" as etsi
+
+== Step 1 – PAR Auth ==
+
+user -> browser: Upload PDF, select journey
+browser -> be++: **POST /api/par/auth**\n(multipart: pdf, journey)
+note right of be
+  Prepare PDF (PDFBox):
+  - add signature placeholder
+  - compute byte range
+  - SHA-256 hash digest
+end note
+be -> mab++: **POST parUri** (mTLS)\nCreateParRequest
+mab --> be--: ParResponse
+note right of be
+  Build authorization URL
+  GET {authorizationUri}
+  ?request_uri=...&client_id=...
+end note
+be --> browser--: ParStartResponse
+browser -> browser : Display auth link
+
+== Step 2 – User Authentication ==
+
+user -> browser : Click "Open QTSP Auth"
+browser -> mab++: Open authorizationUrl in new tab
+user -> mab : Complete authentication
+mab --> browser--: Redirect to redirect_uri\n?code=...&state=...
+user -> browser : Paste authorization code
+
+== Step 3 – Token Exchange ==
+
+user -> browser : Click "Exchange Token"
+browser -> be++: **POST /api/par/token**\nParTokenExchangeRequest
+note right of be
+  Validate session (state + nonce)
+end note
+be -> mab++: **POST tokenUri** (mTLS)\nAuthorizationCodeTokenRequest
+mab --> be--: TokenResponse
+be --> browser--: TokenExchangeResponse
+
+== Step 4 – ETSI Sign ==
+
+user -> browser : Click "Call ETSI Sign"
+browser -> be++: **POST /api/etsi/sign**\nEtsiSignStartRequest
+note right of be
+  Retrieve session with SAD JWT
+  Parse JWT aud → ETSI endpoint
+end note
+be -> etsi++: **POST etsiSignUri** (mTLS)\nEtsiSignRequest
+etsi --> be--: EtsiSignResponse
+note right of be
+  Embed CMS into PDF
+  Upgrade to PAdES B-LT (LTV)
+end note
+be --> browser--: EtsiSignStartResponse
+user -> browser : Click "Download PDF"
+
+@enduml
+

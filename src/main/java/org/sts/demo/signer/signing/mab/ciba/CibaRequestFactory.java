@@ -1,9 +1,9 @@
 package org.sts.demo.signer.signing.mab.ciba;
 
-import org.openapi.mab.model.CreateParRequestLoginHint;
 import org.openapi.mab.model.OauthAuthenticationRequest;
 import org.springframework.stereotype.Component;
 import org.sts.demo.signer.config.QtspProperties;
+import org.sts.demo.signer.signing.domain.Namespace;
 import org.sts.demo.signer.oidc.tac.TacHashResolver;
 import org.sts.demo.signer.signing.util.StateNonceGenerator;
 import org.sts.demo.signer.signing.domain.SigningJourney;
@@ -30,7 +30,7 @@ public class CibaRequestFactory {
         this.tacHashResolver = tacHashResolver;
     }
 
-    private OauthAuthenticationRequest buildBase(String identifier, CreateParRequestLoginHint.NamespaceEnum namespace) {
+    private OauthAuthenticationRequest buildBase(String identifier, Namespace namespace) {
         String loginHintToken = jwtFactory.createLoginHintToken(
                 identifier,
                 namespace.getValue(),
@@ -61,10 +61,10 @@ public class CibaRequestFactory {
 
         OauthAuthenticationRequest authReq = buildBase(identifier, authPolicy.namespace());
         String claimsToken = jwtFactory.createClaimsTokenForSign(
-                authPolicy.credentialId().toMab().getValue(),
+                authPolicy.credentialId().getValue(),
                 digestB64,
                 DOCUMENT_LABEL,
-                authPolicy.hashAlgorithm().toMab().getValue(),
+                authPolicy.hashAlgorithm().getOid(),
                 props.getCiba().getJwtSharedSecret()
         );
         authReq.claimsToken(claimsToken);
@@ -79,6 +79,7 @@ public class CibaRequestFactory {
         );
         String state = StateNonceGenerator.state();
         String nonce = StateNonceGenerator.nonce();
+
         return new CibaStartContext(state, nonce, payload, authPolicy.hashAlgorithm(), authPolicy.credentialId());
     }
 }

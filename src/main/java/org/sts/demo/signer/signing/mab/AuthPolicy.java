@@ -1,58 +1,52 @@
 package org.sts.demo.signer.signing.mab;
 
-import org.openapi.mab.model.CreateParRequest;
-import org.openapi.mab.model.CreateParRequestIdentMethodsInner;
-import org.openapi.mab.model.CreateParRequestLoginHint;
-import org.openapi.mab.model.OauthAuthenticationRequest;
-import org.sts.demo.signer.signing.domain.CredentialId;
-import org.sts.demo.signer.signing.domain.HashAlgorithm;
-import org.sts.demo.signer.signing.domain.SigningJourney;
+import org.sts.demo.signer.signing.domain.*;
 
 import java.util.List;
 
 public record AuthPolicy(
         List<String> scopes,
         CredentialId credentialId,
-        CreateParRequestLoginHint.NamespaceEnum namespace,
-        CreateParRequestIdentMethodsInner.TypeEnum identMethodType,
+        Namespace namespace,
+        IdentMethodType identMethodType,
         HashAlgorithm hashAlgorithm
 ) {
     public static AuthPolicy policyFor(SigningJourney journey) {
         return switch (journey) {
             case PAR_AES_FAST_TRACK -> new AuthPolicy(
-                    List.of(CreateParRequest.ScopeEnum.SIGN.getValue()),
+                    List.of("sign"),
                     CredentialId.ADVANCED4,
-                    CreateParRequestLoginHint.NamespaceEnum.PWDOTP,
+                    Namespace.PWDOTP,
                     null,
                     HashAlgorithm.SHA256);
             case PAR_QES_REP -> new AuthPolicy(
-                    List.of(CreateParRequest.ScopeEnum.SIGN.getValue(), CreateParRequest.ScopeEnum.IDENT.getValue()),
+                    List.of("sign", "ident"),
                     CredentialId.QUALIFIED4,
-                    CreateParRequestLoginHint.NamespaceEnum.WBAUTHN,
-                    CreateParRequestIdentMethodsInner.TypeEnum.FIDENTITY,
+                    Namespace.WBAUTHN,
+                    IdentMethodType.FIDENTITY,
                     HashAlgorithm.SHA256);
             case CIBA_AES_IDENT -> new AuthPolicy(
-                    List.of(OauthAuthenticationRequest.ScopeEnum.IDENT.getValue()),
+                    List.of("ident"),
                     CredentialId.ADVANCED4,
-                    CreateParRequestLoginHint.NamespaceEnum.MSISDN,
-                    CreateParRequestIdentMethodsInner.TypeEnum.FIDENTITY,
+                    Namespace.MSISDN,
+                    IdentMethodType.FIDENTITY,
                     HashAlgorithm.SHA256);
             case CIBA_QES_IDENT -> new AuthPolicy(
-                    List.of(OauthAuthenticationRequest.ScopeEnum.IDENT.getValue()),
+                    List.of("ident"),
                     CredentialId.QUALIFIED4,
-                    CreateParRequestLoginHint.NamespaceEnum.MSISDN,
-                    CreateParRequestIdentMethodsInner.TypeEnum.FIDENTITY,
+                    Namespace.MSISDN,
+                    IdentMethodType.FIDENTITY,
                     HashAlgorithm.SHA256);
             case CIBA_AES_SIGN -> new AuthPolicy(
-                    List.of(OauthAuthenticationRequest.ScopeEnum.SIGN.getValue()),
+                    List.of("sign"),
                     CredentialId.ADVANCED4,
-                    CreateParRequestLoginHint.NamespaceEnum.MSISDN,
+                    Namespace.MSISDN,
                     null,
                     HashAlgorithm.SHA256);
             case CIBA_QES_SIGN -> new AuthPolicy(
-                    List.of(OauthAuthenticationRequest.ScopeEnum.SIGN.getValue()),
+                    List.of("sign"),
                     CredentialId.QUALIFIED4,
-                    CreateParRequestLoginHint.NamespaceEnum.MSISDN,
+                    Namespace.MSISDN,
                     null,
                     HashAlgorithm.SHA256);
         };

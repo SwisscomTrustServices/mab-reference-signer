@@ -12,13 +12,15 @@ public class EtsiSignRequestFactory {
 
     public EtsiSignRequest build(SigningSession session) {
         EtsiSignRequestDocumentDigests digests = new EtsiSignRequestDocumentDigests()
-                .hashAlgorithmOID(session.hashAlgorithm().toEtsi())
+                .hashAlgorithmOID(EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum.fromValue(
+                        session.hashAlgorithm().getOid()))
                 .hashes(List.of(session.digestB64()));
 
         return new EtsiSignRequest()
                 .SAD(session.sadJwt())
                 .documentDigests(digests)
-                .credentialID(session.credentialId().toEtsi())
+                .credentialID(EtsiSignRequest.CredentialIDEnum.fromValue(
+                        session.credentialId().getValue()))
                 .signatureFormat(EtsiSignRequest.SignatureFormatEnum.P);
     }
 }

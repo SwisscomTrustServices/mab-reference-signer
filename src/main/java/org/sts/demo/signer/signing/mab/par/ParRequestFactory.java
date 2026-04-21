@@ -24,8 +24,10 @@ public class ParRequestFactory {
         AuthPolicy authPolicy = policyFor(journey);
 
         CreateParRequestClaims claims = new CreateParRequestClaims();
-        claims.setCredentialID(authPolicy.credentialId().toMab());
-        claims.setHashAlgorithmOID(authPolicy.hashAlgorithm().toMab());
+        claims.setCredentialID(CreateParRequestClaims.CredentialIDEnum.fromValue(
+                authPolicy.credentialId().getValue()));
+        claims.setHashAlgorithmOID(CreateParRequestClaims.HashAlgorithmOIDEnum.fromValue(
+                authPolicy.hashAlgorithm().getOid()));
         claims.setDocumentDigests(List.of(
                 new CreateParRequestClaimsDocumentDigestsInner()
                         .hash(digestB64)
@@ -49,12 +51,15 @@ public class ParRequestFactory {
         if (authPolicy.identMethodType() != null) {
             base.setIdentMethods(List.of(
                     new CreateParRequestIdentMethodsInner()
-                            .type(authPolicy.identMethodType())
+                            .type(CreateParRequestIdentMethodsInner.TypeEnum.fromValue(
+                                    authPolicy.identMethodType().getValue()))
             ));
         }
 
         if (authPolicy.namespace() != null) {
-            base.setLoginHint(new CreateParRequestLoginHint().namespace(authPolicy.namespace()));
+            base.setLoginHint(new CreateParRequestLoginHint()
+                    .namespace(CreateParRequestLoginHint.NamespaceEnum.fromValue(
+                            authPolicy.namespace().getValue())));
         }
 
         List<CreateParRequest.ScopeEnum> scopes = authPolicy.scopes().stream()
