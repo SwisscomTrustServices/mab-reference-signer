@@ -1,7 +1,6 @@
 package org.sts.demo.signer.signing.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public final class JsonNullPruner {
             nullFields.forEach(obj::remove);
 
         } else if (node.isArray()) {
-            for (JsonNode child : (ArrayNode) node) {
+            for (JsonNode child : node) {
                 pruneNulls(child);
             }
         }

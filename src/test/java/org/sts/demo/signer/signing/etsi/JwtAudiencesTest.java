@@ -1,7 +1,6 @@
-package org.sts.demo.signer.signing.util;
+package org.sts.demo.signer.signing.etsi;
 
 import org.junit.jupiter.api.Test;
-import org.sts.demo.signer.signing.etsi.JwtAudiences;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
