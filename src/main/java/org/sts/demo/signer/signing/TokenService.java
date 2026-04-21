@@ -61,7 +61,7 @@ public class TokenService {
                 .flatMap(session -> {
                     UUID authReqId = UUID.fromString(requireNonBlank(in.authReqId(), "Missing authReqId"));
                     OauthTokenRequest req = tokenRequestFactory.buildTokenPollingRequest(authReqId);
-                    return tokenClient.pollCibaToken(req)
+                    return tokenClient.poll(req)
                             .map(tokenSignResponse -> {
                                 String sadJwt = requireNonBlank(tokenSignResponse.getAccessToken(), "Token response missing access_token");
                                 sessions.put(session.withSadJwt(sadJwt));

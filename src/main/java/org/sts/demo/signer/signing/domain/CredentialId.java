@@ -1,32 +1,14 @@
 package org.sts.demo.signer.signing.domain;
 
-import org.openapi.etsi.model.EtsiSignRequest;
-import org.openapi.mab.model.CreateParRequestClaims;
-
 public enum CredentialId {
-    ADVANCED4(EtsiSignRequest.CredentialIDEnum.ADVANCED4,
-            CreateParRequestClaims.CredentialIDEnum.ADVANCED4),
-    ADVANCED4_1_EU(EtsiSignRequest.CredentialIDEnum.ADVANCED4_1_EU,
-            CreateParRequestClaims.CredentialIDEnum.ADVANCED4_1_EU),
-    QUALIFIED4(EtsiSignRequest.CredentialIDEnum.QUALIFIED4,
-            CreateParRequestClaims.CredentialIDEnum.QUALIFIED4),
-    QUALIFIED4_1_EU(EtsiSignRequest.CredentialIDEnum.QUALIFIED4_1_EU,
-            CreateParRequestClaims.CredentialIDEnum.QUALIFIED4_1_EU);
+    ADVANCED4("OnDemand-Advanced4"),
+    ADVANCED4_1_EU("OnDemand-Advanced4.1-EU"),
+    QUALIFIED4("OnDemand-Qualified4"),
+    QUALIFIED4_1_EU("OnDemand-Qualified4.1-EU");
 
-    private final EtsiSignRequest.CredentialIDEnum etsiCredentialId;
-    private final CreateParRequestClaims.CredentialIDEnum mabCredentialId;
+    private final String value;
 
-    CredentialId(EtsiSignRequest.CredentialIDEnum etsiCredentialId,
-                 CreateParRequestClaims.CredentialIDEnum mabCredentialId) {
-        this.etsiCredentialId = etsiCredentialId;
-        this.mabCredentialId = mabCredentialId;
-    }
+    CredentialId(String value) { this.value = value; }
 
-    public EtsiSignRequest.CredentialIDEnum toEtsi() {
-        return etsiCredentialId;
-    }
-
-    public CreateParRequestClaims.CredentialIDEnum toMab() {
-        return mabCredentialId;
-    }
+    public String getValue() { return value; }
 }

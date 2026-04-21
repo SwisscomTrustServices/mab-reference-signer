@@ -1,0 +1,89 @@
+@startuml CIBA Flow
+skinparam responseMessageBelowArrow true
+
+actor       User   as user
+participant Browser as browser
+participant "Demo Backend" as be
+participant "MAB API" as mab
+participant "ETSI Sign API" as etsi
+
+== Step 1 – Webfinger Check ==
+
+user -> browser : Enter identifier, select journey
+browser -> be++: **GET /api/ciba/webfinger**\n(identifier, journey)
+be -> mab++: **GET webfingerUri** (mTLS)
+mab --> be--: Webfinger JSON
+be --> browser--: CibaWebfingerResponse
+browser -> browser : Show onboarding status
+
+== Step 2 – CIBA Auth ==
+
+user -> browser : (Upload PDF if sign), click "CIBA Auth"
+
+alt Ident journey (not onboarded)
+browser -> be++: **POST /api/ciba/auth**\n(multipart: identifier, journey)
+note right of be
+  If ident journey:
+  - Set ident method
+  - Set TAC language
+  - Set TAC hashes
+end note
+be -> mab++: **POST cibaAuthUri** (mTLS)\nOauthAuthenticationRequest
+mab --> be--: OauthAuthenticationResponse
+be --> browser--: CibaStartResponse
+browser -> browser : Open ident_process_data URL\nin new tab
+user -> mab : Complete identification
+
+else Sign Journey (onboarded)
+browser -> be++: **POST /api/ciba/auth**\n(multipart: pdf, identifier, journey)
+note right of be
+  If sign journey:
+  - Prepare PDF (PDFBox)
+  - SHA-256 hash digest
+  - Build claims_token JWT (HS256)
+  Build login_hint_token JWT (HS256)
+end note
+be -> mab++: **POST cibaAuthUri** (mTLS)\nOauthAuthenticationRequest
+mab --> be--: OauthAuthenticationResponse
+be --> browser--: CibaStartResponse
+user -> mab : Complete authentication
+
+end
+
+== Step 3 – CIBA Token Polling ==
+
+user -> browser : Click "Poll Token"
+loop polling (UI-driven)
+  browser -> be++: **POST /api/ciba/token**\nCibaTokenPollRequest
+  be -> mab++: **POST cibaTokenUri** (mTLS)\nOauthTokenRequest
+
+  alt authorization_pending (HTTP 400)
+    mab --> be: OauthTokenErrorResponse\nerror: "authorization_pending"
+    be --> browser: CibaTokenPollResponse\nstatus: "PENDING", nextPollInSec: 5
+    browser -> browser : Wait nextPollInSec\n(countdown spinner)
+
+  else token ready (HTTP 200)
+    mab --> be--: OauthTokenSignResponse\naccess_token (SAD JWT)
+    be --> browser--: CibaTokenPollResponse\nstatus: "READY", accessToken
+  end
+end
+
+== Step 4 – ETSI Sign ==
+
+user -> browser: Click "Poll Token"
+browser -> be++: **POST /api/etsi/sign**\nEtsiSignStartRequest
+note right of be
+  Retrieve session with SAD JWT
+  Parse JWT aud → ETSI endpoint
+end note
+be -> etsi++: **POST etsiSignUri** (mTLS)\nEtsiSignRequest
+etsi --> be--: EtsiSignResponse
+note right of be
+  Embed CMS into PDF
+  Upgrade to PAdES B-LT (LTV)
+end note
+be --> browser--: EtsiSignStartResponse
+user -> browser : Click "Download PDF"
+
+@enduml
+

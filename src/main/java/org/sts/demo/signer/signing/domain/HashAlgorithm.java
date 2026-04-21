@@ -1,30 +1,13 @@
 package org.sts.demo.signer.signing.domain;
 
-import org.openapi.etsi.model.EtsiSignRequestDocumentDigests;
-import org.openapi.mab.model.CreateParRequestClaims;
-
 public enum HashAlgorithm {
-    SHA256(EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum._1,
-            CreateParRequestClaims.HashAlgorithmOIDEnum._1),
-    SHA384(EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum._2,
-            CreateParRequestClaims.HashAlgorithmOIDEnum._2),
-    SHA512(EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum._3,
-            CreateParRequestClaims.HashAlgorithmOIDEnum._3);
+    SHA256("2.16.840.1.101.3.4.2.1"),
+    SHA384("2.16.840.1.101.3.4.2.2"),
+    SHA512("2.16.840.1.101.3.4.2.3");
 
-    private final EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum etsiOid;
-    private final CreateParRequestClaims.HashAlgorithmOIDEnum mabOid;
+    private final String oid;
 
-    HashAlgorithm(EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum etsiOid,
-                  CreateParRequestClaims.HashAlgorithmOIDEnum mabOid) {
-        this.etsiOid = etsiOid;
-        this.mabOid = mabOid;
-    }
+    HashAlgorithm(String oid) { this.oid = oid; }
 
-    public EtsiSignRequestDocumentDigests.HashAlgorithmOIDEnum toEtsi() {
-        return etsiOid;
-    }
-
-    public CreateParRequestClaims.HashAlgorithmOIDEnum toMab() {
-        return mabOid;
-    }
+    public String getOid() { return oid; }
 }

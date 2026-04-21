@@ -88,6 +88,20 @@ sourceSets {
     }
 }
 
+tasks.register("generateDiagrams", Exec) {
+    description = "Generate PNG diagrams from PlantUML sources in docs/"
+    group = "documentation"
+    inputs.dir("$rootDir/docs")
+    outputs.files(
+            "$rootDir/docs/par-flow.png",
+            "$rootDir/docs/ciba-flow.png"
+    )
+    commandLine "sh", "-c",
+            "plantuml -tpng -o . docs/*.puml && " +
+            "cd docs && " +
+            "for f in *.png; do mv \"\$f\" \"\$(echo \"\$f\" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')\"; done"
+}
+
 tasks.named("compileJava") {
     dependsOn("generateMabClient", "generateEtsiClient")
 }

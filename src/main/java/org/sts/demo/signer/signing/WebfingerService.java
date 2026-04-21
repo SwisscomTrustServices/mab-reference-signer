@@ -44,7 +44,7 @@ public class WebfingerService {
         String normalizedIdentifier = normalizeIdentifier(identifier);
         var policy = policyFor(journey);
         String resource = "urn:mab:acct:" + normalizedIdentifier + ":" + policy.namespace().getValue().toLowerCase();
-        String credentialId = policy.credentialId().toMab().getValue();
+        String credentialId = policy.credentialId().getValue();
 
         URI uri = UriComponentsBuilder.fromUriString(endpoints.webfingerUri())
                 .queryParam("client_id", props.getClient().getClientId())
