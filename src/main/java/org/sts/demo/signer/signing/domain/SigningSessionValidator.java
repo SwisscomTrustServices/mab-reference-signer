@@ -13,9 +13,15 @@ public class SigningSessionValidator {
     }
 
     public SigningSession validateAndTake(String state, String nonce) {
+        SigningSession session = validate(state, nonce);
+        sessions.remove(state);
+        return session;
+    }
+
+    public SigningSession validate(String state, String nonce) {
         requireNonBlank(state, "Missing state");
         requireNonBlank(nonce, "Missing nonce");
-        SigningSession session = sessions.remove(state);
+        SigningSession session = sessions.get(state);
         if (session == null) throw new IllegalArgumentException("Unknown/expired state");
         if (!nonce.equals(session.nonce())) throw new IllegalArgumentException("Invalid nonce for state");
         return session;

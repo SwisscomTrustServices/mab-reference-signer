@@ -53,7 +53,17 @@ public class CibaStartService {
     public Mono<CibaStartResponse> startCibaIdentAuth(SigningJourney journey, String identifier) {
         var ctx = cibaRequestFactory.buildIdent(journey, identifier);
         return cibaClient.authenticate(ctx.request())
-                .map(resp -> toCibaAuthStartResponse(ctx, resp));
+                .map(resp -> {
+                    sessions.putInitial(
+                            ctx.state(),
+                            ctx.nonce(),
+                            null,
+                            null,
+                            null,
+                            null
+                    );
+                    return toCibaAuthStartResponse(ctx, resp);
+                });
     }
 
     public Mono<CibaStartResponse> startCibaSignAuth(MultipartFile pdf, SigningJourney journey, String identifier) {
@@ -95,9 +105,10 @@ public class CibaStartService {
 
     private static CibaStartResponse toCibaAuthStartResponse(CibaStartContext ctx, OauthAuthenticationResponse resp) {
         return new CibaStartResponse(
+                requireNonBlank(resp.getAuthReqId().toString(), "CIBA response missing auth_req_id"),
                 ctx.state(),
                 ctx.nonce(),
-                requireNonBlank(resp.getAuthReqId().toString(), "CIBA response missing auth_req_id")
+                resp.getIdentProcessData()
         );
     }
 }

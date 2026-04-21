@@ -62,22 +62,24 @@ public class WebfingerService {
                 .exchangeToMono(resp -> {
                     int status = resp.statusCode().value();
                     if (status == 404) {
-                        log.info("Webfinger status=404 resource={} (not onboarded)", resource);
-                        return Mono.just(new CibaWebfingerResponse(false, resource, null, null,
-                                "Identifier not onboarded"));
-                    }
-                    if (status >= 200 && status < 300) {
-                        return resp.bodyToMono(String.class)
-                                .doOnNext(body -> log.info("Webfinger success status={} body={}", status, body))
-                                .map(this::toResponse);
+                        log.info("Webfinger status=404 resource={}", resource);
+                        return resp.releaseBody()
+                                .thenReturn(new CibaWebfingerResponse(
+                                        false, resource, null, null, null, null,
+                                        "Identifier not onboarded"));
                     }
                     return resp.bodyToMono(String.class)
                             .defaultIfEmpty("")
-                            .flatMap(body -> {
-                                log.warn("Webfinger failed status={} body={}", status, body);
-                                return Mono.error(new IllegalStateException("Webfinger failed: " + status + " body=" + body));
-                            });
+                            .doOnNext(body -> log.info("Webfinger response status={} body={}", status, body))
+                            .flatMap(body -> classifyWebfingerResponse(status, body));
                 });
+    }
+
+    private Mono<CibaWebfingerResponse> classifyWebfingerResponse(int status, String body) {
+        if (status >= 200 && status < 300) {
+            return Mono.just(toResponse(body));
+        }
+        return Mono.error(new IllegalStateException("Webfinger failed: " + status + " body=" + body));
     }
 
     private CibaWebfingerResponse toResponse(String body) {
@@ -88,8 +90,19 @@ public class WebfingerService {
             boolean onboarded = "true".equalsIgnoreCase(eligible);
             String subject = text(root.path("subject"));
             String platform = text(properties.path("urn:mab:sign:platform"));
-            String message = onboarded ? "Identifier is onboarded" : "Identifier is not onboarded";
-            return new CibaWebfingerResponse(onboarded, subject, eligible, platform, message);
+            String status = text(properties.path("urn:mab:sign:status"));
+            String evidenceExpiryDate = text(properties.path("urn:mab:sign:evidenceExpiryDate"));
+
+            String message;
+            if (status != null) {
+                message = "Serial mismatch: " + status;
+            } else if (onboarded) {
+                message = "Identifier is onboarded";
+            } else {
+                message = "Identifier is not onboarded";
+            }
+
+            return new CibaWebfingerResponse(onboarded, subject, eligible, platform, status, evidenceExpiryDate, message);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to parse webfinger response", e);
         }

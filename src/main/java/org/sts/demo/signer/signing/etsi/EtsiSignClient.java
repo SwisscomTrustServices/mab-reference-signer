@@ -14,9 +14,7 @@ import org.sts.demo.signer.signing.util.JsonNullPruner;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-
-import static org.sts.demo.signer.signing.etsi.EtsiAudienceSelector.pickEtsiBaseUri;
-
+import java.util.List;
 
 @Service
 public class EtsiSignClient {
@@ -37,7 +35,7 @@ public class EtsiSignClient {
         ObjectNode json = apiClient.getObjectMapper().valueToTree(req);
         JsonNullPruner.pruneNulls(json);
 
-        URI signUri = pickEtsiBaseUri(req.getSAD());
+        URI signUri = resolveEtsiUri(req.getSAD());
         log.info("ETSI request payload={}", json.toPrettyString());
         log.info("SIGN POST {}", signUri);
 
@@ -59,5 +57,13 @@ public class EtsiSignClient {
                                 return Mono.error(new IllegalStateException("ETSI failed: " + status));
                             });
                 });
+    }
+
+    private static URI resolveEtsiUri(String sadJwt) {
+        List<String> auds = JwtAudiences.aud(sadJwt);
+        if (auds.size() != 1) {
+            throw new IllegalStateException("Expected exactly 1 aud in SAD JWT, got " + auds.size());
+        }
+        return URI.create(auds.getFirst());
     }
 }

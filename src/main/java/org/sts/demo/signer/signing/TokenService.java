@@ -56,7 +56,7 @@ public class TokenService {
     }
 
     public Mono<CibaTokenPollResponse> pollCibaToken(CibaTokenPollRequest in) {
-        return Mono.fromCallable(() -> signingSessionValidator.validateAndTake(in.state(), in.nonce()))
+        return Mono.fromCallable(() -> signingSessionValidator.validate(in.state(), in.nonce()))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(session -> {
                     UUID authReqId = UUID.fromString(requireNonBlank(in.authReqId(), "Missing authReqId"));
@@ -68,15 +68,12 @@ public class TokenService {
                                 return toCibaTokenPollResponse(sadJwt);
                             })
                             .onErrorResume(TokenClient.CibaAuthorizationPendingException.class,
-                                    ex -> {
-                                        sessions.put(session);
-                                        return Mono.just(new CibaTokenPollResponse(
-                                                "PENDING",
-                                                null,
-                                                CIBA_POLL_INTERVAL_SECONDS,
-                                                "authorization_pending"
-                                        ));
-                                    });
+                                    ex -> Mono.just(new CibaTokenPollResponse(
+                                            "PENDING",
+                                            null,
+                                            CIBA_POLL_INTERVAL_SECONDS,
+                                            "authorization_pending"
+                                    )));
                 });
     }
 

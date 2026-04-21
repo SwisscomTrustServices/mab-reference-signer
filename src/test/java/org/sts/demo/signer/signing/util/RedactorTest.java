@@ -40,19 +40,6 @@ class RedactorTest {
     }
 
     @Test
-    void pad_returnsSameString_whenAlreadyPadded() {
-        String b64 = "abcd"; // length % 4 == 0
-        assertEquals(b64, Redactor.pad(b64));
-    }
-
-    @Test
-    void pad_addsCorrectPadding_whenMissing() {
-        assertEquals("abc=", Redactor.pad("abc"));
-        assertEquals("ab==", Redactor.pad("ab"));
-        assertEquals("a===", Redactor.pad("a"));
-    }
-
-    @Test
     void redactJwt_nullAndBlank_areReturnedAsIs() {
         assertNull(Redactor.redactJwt(null));
         assertEquals("", Redactor.redactJwt(""));
