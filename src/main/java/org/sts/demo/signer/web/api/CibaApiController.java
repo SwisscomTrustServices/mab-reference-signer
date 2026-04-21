@@ -34,7 +34,7 @@ public class CibaApiController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<CibaStartResponse> ciba(
+    public Mono<CibaStartResponse> cibaAuth(
             @RequestPart(value = "pdf", required = false) MultipartFile pdf,
             @RequestParam("identifier") String identifier,
             @RequestParam("journey") SigningJourney journey

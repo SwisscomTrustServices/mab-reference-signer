@@ -23,9 +23,5 @@ public record SigningSession (
     public SigningSession {
         if (state == null || state.isBlank()) throw new IllegalArgumentException("state is required");
         if (nonce == null || nonce.isBlank()) throw new IllegalArgumentException("nonce is required");
-        if (digestB64 == null || digestB64.isBlank()) throw new IllegalArgumentException("digestB64 is required");
-        if (hashAlgorithm == null) throw new IllegalArgumentException("hashAlg is required");
-        if (credentialId == null) throw new IllegalArgumentException("credentialId is required");
-        if (document == null) throw new IllegalArgumentException("document is required");
     }
 }

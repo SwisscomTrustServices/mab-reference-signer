@@ -10,8 +10,6 @@ import java.util.List;
 @Component
 public class EtsiSignRequestFactory {
 
-    public EtsiSignRequestFactory() {}
-
     public EtsiSignRequest build(SigningSession session) {
         EtsiSignRequestDocumentDigests digests = new EtsiSignRequestDocumentDigests()
                 .hashAlgorithmOID(session.hashAlgorithm().toEtsi())

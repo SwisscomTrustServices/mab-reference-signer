@@ -12,15 +12,17 @@ import java.time.Duration;
 
 @Component
 public class TacHashResolver {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final ObjectMapper objectMapper;
     private final WebClient publicClient;
     private final OidcEndpoints endpoints;
 
     public TacHashResolver(@Qualifier("qtspPublicWebClient") WebClient publicClient,
-                           OidcEndpoints endpoints) {
+                           OidcEndpoints endpoints,
+                           ObjectMapper objectMapper) {
         this.publicClient = publicClient;
         this.endpoints = endpoints;
+        this.objectMapper = objectMapper;
     }
 
     public String resolveSha256(String documentKey) {
@@ -37,7 +39,7 @@ public class TacHashResolver {
                 throw new IllegalStateException("Empty TAC response from " + endpoints.tacUri());
             }
 
-            JsonNode root = MAPPER.readTree(body);
+            JsonNode root = objectMapper.readTree(body);
             String hash = root.path(documentKey).path("sha256").asText(null);
 
             if (hash == null || hash.isBlank()) {
@@ -49,4 +51,3 @@ public class TacHashResolver {
         }
     }
 }
-

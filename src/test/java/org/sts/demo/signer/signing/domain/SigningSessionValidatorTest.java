@@ -34,22 +34,22 @@ class SigningSessionValidatorTest {
     }
 
     @Test
-    void validateIfPresent_shouldReturnNullForMissingState() {
+    void validate_shouldThrowForMissingState() {
         SigningSessionStore store = new SigningSessionStore();
         SigningSessionValidator v = new SigningSessionValidator(store);
 
-        assertNull(v.validateIfPresent("unknown", "nonce"));
+        assertThrows(IllegalArgumentException.class, () -> v.validate("unknown", "nonce"));
     }
 
     @Test
-    void validateIfPresent_shouldNotConsumeState() {
+    void validate_shouldNotConsumeState() {
         SigningSessionStore store = new SigningSessionStore();
         SigningSessionValidator v = new SigningSessionValidator(store);
 
         var s = new SigningSession("stateC", "nonceC", "digest", HashAlgorithm.SHA256, CredentialId.ADVANCED4, null, new NoopDoc());
         store.put(s);
 
-        SigningSession lookedUp = v.validateIfPresent("stateC", "nonceC");
+        SigningSession lookedUp = v.validate("stateC", "nonceC");
         assertEquals("stateC", lookedUp.state());
 
         assertNotNull(store.remove("stateC"), "state should remain available for later steps");

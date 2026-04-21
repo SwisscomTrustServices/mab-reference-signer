@@ -5,6 +5,8 @@ public record CibaWebfingerResponse(
         String subject,
         String eligible,
         String platform,
+        String status,
+        String evidenceExpiryDate,
         String message
 ) {}
 

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static org.sts.demo.signer.signing.util.Redactor.pad;
-
 public final class JwtAudiences {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -19,7 +17,7 @@ public final class JwtAudiences {
         String[] parts = jwt.split("\\.");
         if (parts.length < 2) throw new IllegalArgumentException("Not a JWT");
 
-        byte[] jsonBytes = Base64.getUrlDecoder().decode(pad(parts[1]));
+        byte[] jsonBytes = Base64.getUrlDecoder().decode(padBase64(parts[1]));
         JsonNode payload;
         try {
             payload = MAPPER.readTree(jsonBytes);
@@ -37,5 +35,10 @@ public final class JwtAudiences {
             return out;
         }
         return List.of();
+    }
+
+    private static String padBase64(String b64) {
+        int mod = b64.length() % 4;
+        return mod == 0 ? b64 : b64 + "====".substring(mod);
     }
 }

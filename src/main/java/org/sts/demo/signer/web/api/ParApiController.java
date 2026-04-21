@@ -7,7 +7,7 @@ import org.sts.demo.signer.signing.ParStartService;
 import org.sts.demo.signer.signing.TokenService;
 import org.sts.demo.signer.web.dto.ParStartResponse;
 import org.sts.demo.signer.signing.domain.SigningJourney;
-import org.sts.demo.signer.web.dto.TokenExchangeRequest;
+import org.sts.demo.signer.web.dto.ParTokenExchangeRequest;
 import org.sts.demo.signer.web.dto.TokenExchangeResponse;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +27,7 @@ public class ParApiController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<ParStartResponse> par(
+    public Mono<ParStartResponse> parAuth(
             @RequestPart("pdf") MultipartFile pdf,
             @RequestParam("journey") SigningJourney journey
     ) {
@@ -39,7 +39,7 @@ public class ParApiController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<TokenExchangeResponse> token(@RequestBody TokenExchangeRequest req) {
+    public Mono<TokenExchangeResponse> parToken(@RequestBody ParTokenExchangeRequest req) {
         return tokenService.exchangeAuthCodeForAccessToken(req);
     }
 }

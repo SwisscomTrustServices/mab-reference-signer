@@ -75,7 +75,7 @@ public class EtsiSignService {
 
         List<byte[]> out = new ArrayList<>();
         for (X509CertificateHolder h : certs) {
-            out.add(h.getEncoded()); // DER
+            out.add(h.getEncoded());
         }
         return out;
     }

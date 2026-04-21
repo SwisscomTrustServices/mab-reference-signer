@@ -2,7 +2,7 @@ package org.sts.demo.signer.web.dto;
 
 public record CibaTokenPollResponse(
         String status,
-        TokenExchangeResponse token,
+        String accessToken,
         Integer nextPollInSec,
         String message
 ) {}
