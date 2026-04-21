@@ -21,7 +21,7 @@ class SigningSessionValidatorTest {
     }
 
     @Test
-    void validateAndTake_wrongNonce_shouldConsumeStateAnyway() {
+    void validateAndTake_wrongNonce_shouldNotConsumeState() {
         SigningSessionStore store = new SigningSessionStore();
         SigningSessionValidator v = new SigningSessionValidator(store);
 
@@ -30,7 +30,7 @@ class SigningSessionValidatorTest {
 
         assertThrows(IllegalArgumentException.class, () -> v.validateAndTake("stateB", "WRONG"));
 
-        assertNull(store.remove("stateB"), "state should still be consumed to prevent brute-force nonce guessing");
+        assertNotNull(store.get("stateB"), "state should not be consumed on wrong nonce");
     }
 
     @Test
