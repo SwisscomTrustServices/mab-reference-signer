@@ -1,6 +1,6 @@
 # Demo Signer (MAB + ETSI Sign)
 
-This project is a minimal end-to-end demo that shows how to integrate the Swisscom Trust Services Multiple Authentication Broker (MAB) APIs (OIDC + PAR + Token) and the ETSI Sign API.
+This project is a minimal end-to-end demo that shows how to integrate the Swisscom Trust Services Multiple Authentication Broker (MAB) APIs and the ETSI Sign API.
 
 It is built as a reference implementation for:
 - Using mTLS for all protected endpoints 
