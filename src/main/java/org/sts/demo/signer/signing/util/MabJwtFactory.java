@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.sts.demo.signer.signing.util.ValidationUtils.requireNonBlank;
+
 @Component
 public class MabJwtFactory {
     private final ObjectMapper objectMapper;
@@ -21,12 +23,8 @@ public class MabJwtFactory {
     }
 
     public String createLoginHintToken(String identifier, String namespace, String secret) {
-        if (identifier == null || identifier.isBlank()) {
-            throw new IllegalArgumentException("identifier is required");
-        }
-        if (namespace == null || namespace.isBlank()) {
-            throw new IllegalArgumentException("namespace is required");
-        }
+        requireNonBlank(identifier, "identifier is required");
+        requireNonBlank(namespace, "namespace is required");
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("identifier", identifier);
         payload.put("namespace", namespace);
@@ -39,12 +37,8 @@ public class MabJwtFactory {
             String label,
             String hashAlgorithmOid,
             String secret) {
-        if (base64Digest == null || base64Digest.isBlank()) {
-            throw new IllegalArgumentException("base64Digest is required");
-        }
-        if (hashAlgorithmOid == null || hashAlgorithmOid.isBlank()) {
-            throw new IllegalArgumentException("hashAlgorithmOid is required");
-        }
+        requireNonBlank(base64Digest, "base64Digest is required");
+        requireNonBlank(hashAlgorithmOid, "hashAlgorithmOid is required");
 
         Map<String, Object> payload = new LinkedHashMap<>();
 
@@ -65,9 +59,7 @@ public class MabJwtFactory {
     }
 
     private String createHs256Jwt(Map<String, Object> payload, String secret) {
-        if (secret == null || secret.isBlank()) {
-            throw new IllegalArgumentException("secret is required");
-        }
+        requireNonBlank(secret, "secret is required");
         try {
             Map<String, Object> header = Map.of(
                     "alg", "HS256",

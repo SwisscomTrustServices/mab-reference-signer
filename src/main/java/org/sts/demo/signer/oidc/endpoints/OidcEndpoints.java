@@ -6,6 +6,8 @@ import org.sts.demo.signer.oidc.discovery.OidcDiscoveryCache;
 
 import java.net.URI;
 
+import static org.sts.demo.signer.signing.util.ValidationUtils.requireNonBlank;
+
 @Component
 public class OidcEndpoints {
     private final OidcDiscoveryCache cache;
@@ -18,60 +20,42 @@ public class OidcEndpoints {
     }
 
     public String parUri() {
-        String url = cache.get().pushedAuthorizationRequestEndpoint();
-        if (url == null || url.isBlank()) {
-            throw new IllegalStateException("OIDC discovery missing pushed_authorization_request_endpoint");
-        }
-        return url;
+        return requireNonBlank(cache.get().pushedAuthorizationRequestEndpoint(),
+                "OIDC discovery missing pushed_authorization_request_endpoint");
     }
 
     public String authorizationUri() {
-        String url = cache.get().authorizationEndpoint();
-        if (url == null || url.isBlank()) {
-            throw new IllegalStateException("OIDC discovery missing authorization_endpoint");
-        }
-        return url;
+        return requireNonBlank(cache.get().authorizationEndpoint(),
+                "OIDC discovery missing authorization_endpoint");
     }
 
     public String tokenUri() {
-        String url = cache.get().tokenEndpoint();
-        if (url == null || url.isBlank()) {
-            throw new IllegalStateException("OIDC discovery missing token_endpoint");
-        }
-        URI discoveredUri = URI.create(url);
-
-        URI mtlsBase = props.getMtls().getBaseUrl();
-        return mtlsBase.toString().replaceAll("/+$","") + discoveredUri.getPath();
+        String url = requireNonBlank(cache.get().tokenEndpoint(),
+                "OIDC discovery missing token_endpoint");
+        return mtlsUri(URI.create(url).getPath());
     }
 
     public String cibaAuthUri() {
-        URI mtlsBase = props.getMtls().getBaseUrl();
-        return mtlsBase.toString().replaceAll("/+$", "") +
-                "/api/auth/realms/broker/protocol/openid-connect/oauth-authorize";
+        return mtlsUri("/api/auth/realms/broker/protocol/openid-connect/oauth-authorize");
     }
 
     public String cibaTokenUri() {
-        URI mtlsBase = props.getMtls().getBaseUrl();
-        return mtlsBase.toString().replaceAll("/+$", "") +
-                "/api/auth/realms/broker/protocol/openid-connect/oauth-token";
+        return mtlsUri("/api/auth/realms/broker/protocol/openid-connect/oauth-token");
     }
 
     public String tacUri() {
-        String url = cache.get().termsAndConditionsEndpoint();
-        if (url == null || url.isBlank()) {
-            throw new IllegalStateException("OIDC discovery missing terms_and_conditions_endpoint");
-        }
-        return url;
+        return requireNonBlank(cache.get().termsAndConditionsEndpoint(),
+                "OIDC discovery missing terms_and_conditions_endpoint");
     }
 
     public String webfingerUri() {
-        String url = cache.get().resolvedWebfingerEndpoint();
-        if (url == null || url.isBlank()) {
-            throw new IllegalStateException("OIDC discovery missing webfinger_endpoint");
-        }
-        URI discoveredUri = URI.create(url);
+        String url = requireNonBlank(cache.get().resolvedWebfingerEndpoint(),
+                "OIDC discovery missing webfinger_endpoint");
+        return mtlsUri(URI.create(url).getPath());
+    }
 
-        URI mtlsBase = props.getMtls().getBaseUrl();
-        return mtlsBase.toString().replaceAll("/+$", "") + discoveredUri.getPath();
+    private String mtlsUri(String path) {
+        return props.getMtls().getBaseUrl().toString().replaceAll("/+$", "") + path;
     }
 }
+

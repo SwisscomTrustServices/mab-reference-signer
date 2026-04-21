@@ -10,11 +10,6 @@ public final class Redactor {
         return s.length() <= 24 ? "***redacted***" : s.substring(0, 12) + "…" + s.substring(s.length() - 12);
     }
 
-    public static String pad(String b64) {
-        int mod = b64.length() % 4;
-        return mod == 0 ? b64 : b64 + "====".substring(mod);
-    }
-
     public static String redactJwt(String jwt) {
         if (jwt == null || jwt.isBlank()) return jwt;
         String s = jwt.trim();

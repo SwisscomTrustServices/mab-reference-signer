@@ -21,12 +21,14 @@ import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import org.sts.demo.signer.signing.util.JsonNullPruner;
 import reactor.core.publisher.Mono;
 
+import static org.sts.demo.signer.signing.util.FormPrettyPrinter.prettyPrint;
+
 @Component
 public class TokenClient {
 
     private static final Logger log = LoggerFactory.getLogger(TokenClient.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final ObjectMapper objectMapper;
     private final WebClient mtlsClient;
     private final ApiClient apiClient;
     private final OidcEndpoints endpoints;
@@ -34,10 +36,12 @@ public class TokenClient {
     public TokenClient(
             @Qualifier("qtspMtlsWebClient") WebClient mtlsClient,
             @Qualifier("qtspMtlsApiClient") ApiClient apiClient,
-            OidcEndpoints endpoints) {
+            OidcEndpoints endpoints,
+            ObjectMapper objectMapper) {
         this.mtlsClient = mtlsClient;
         this.apiClient = apiClient;
         this.endpoints = endpoints;
+        this.objectMapper = objectMapper;
     }
 
     public Mono<TokenResponse> exchange(AuthorizationCodeTokenRequest req) {
@@ -74,7 +78,7 @@ public class TokenClient {
         form.add("grant_type", req.getGrantType().getValue());
         form.add("auth_req_id", req.getAuthReqId().toString());
 
-        final String prettyForm = toPrettyForm(form);
+        final String prettyForm = prettyPrint(objectMapper, form);
 
         return Mono.defer(() -> {
             log.info("CIBA Token form payload={}", prettyForm);
@@ -89,27 +93,30 @@ public class TokenClient {
                         int status = resp.statusCode().value();
                         return resp.bodyToMono(String.class)
                                 .defaultIfEmpty("")
+                                .doOnNext(body -> log.info("CIBA Token response status={} body={}", status, body))
                                 .flatMap(body -> classifyCibaTokenResponse(status, body));
                     });
         });
     }
 
     private Mono<OauthTokenSignResponse> classifyCibaTokenResponse(int status, String body) {
-        if (isAuthorizationPendingBody(body)) {
-            return Mono.error(new CibaAuthorizationPendingException("authorization_pending"));
+        if (status >= 200 && status < 300) {
+            return parseSuccessResponse(status, body);
         }
+        return parseErrorResponse(status, body);
+    }
 
+    private Mono<OauthTokenSignResponse> parseSuccessResponse(int status, String body) {
         try {
             OauthTokenSignResponse ok = apiClient.getObjectMapper().readValue(body, OauthTokenSignResponse.class);
-            String accessToken = ok.getAccessToken();
-            if (!accessToken.isBlank()) {
-                log.info("CIBA token success status={}", status);
-                return Mono.just(ok);
-            }
-        } catch (Exception ignored) {
-            // Parsed below as error body if possible.
+            log.info("CIBA token success status={}", status);
+            return Mono.just(ok);
+        } catch (Exception e) {
+            return Mono.error(new IllegalStateException("CIBA token response unparseable, status=" + status + " body=" + body, e));
         }
+    }
 
+    private <T> Mono<T> parseErrorResponse(int status, String body) {
         try {
             OauthTokenErrorResponse err = apiClient.getObjectMapper().readValue(body, OauthTokenErrorResponse.class);
             if (err.getError() == OauthTokenErrorResponse.ErrorEnum.AUTHORIZATION_PENDING) {
@@ -118,22 +125,8 @@ public class TokenClient {
             String code = err.getError().getValue();
             String desc = err.getErrorDescription() == null ? "" : err.getErrorDescription();
             return Mono.error(new IllegalStateException("CIBA token failed: " + status + " error=" + code + " desc=" + desc));
-        } catch (Exception parseError) {
-            return Mono.error(new IllegalStateException("CIBA token failed: " + status + " body=" + body));
-        }
-    }
-
-    private static boolean isAuthorizationPendingBody(String body) {
-        if (body == null) return false;
-        String normalized = body.toLowerCase();
-        return normalized.contains("authorization_pending");
-    }
-
-    private static String toPrettyForm(MultiValueMap<String, String> form) {
-        try {
-            return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(form);
         } catch (Exception e) {
-            return form.toString();
+            return Mono.error(new IllegalStateException("CIBA token failed: " + status + " body=" + body, e));
         }
     }
 

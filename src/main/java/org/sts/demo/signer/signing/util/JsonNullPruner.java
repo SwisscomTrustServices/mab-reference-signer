@@ -1,11 +1,8 @@
 package org.sts.demo.signer.signing.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public final class JsonNullPruner {
@@ -17,25 +14,18 @@ public final class JsonNullPruner {
 
         if (node.isObject()) {
             ObjectNode obj = (ObjectNode) node;
-
-            // collect names first -> no ConcurrentModificationException
-            List<String> names = new ArrayList<>();
-            for (Iterator<String> it = obj.fieldNames(); it.hasNext(); ) {
-                names.add(it.next());
-            }
-
-            for (String name : names) {
-                JsonNode child = obj.get(name);
-                if (child == null || child.isNull()) {
-                    obj.remove(name);
+            List<String> nullFields = new java.util.ArrayList<>();
+            obj.fields().forEachRemaining(entry -> {
+                if (entry.getValue().isNull()) {
+                    nullFields.add(entry.getKey());
                 } else {
-                    pruneNulls(child);
+                    pruneNulls(entry.getValue());
                 }
-            }
+            });
+            nullFields.forEach(obj::remove);
 
         } else if (node.isArray()) {
-            ArrayNode arr = (ArrayNode) node;
-            for (JsonNode child : arr) {
+            for (JsonNode child : node) {
                 pruneNulls(child);
             }
         }

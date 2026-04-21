@@ -5,6 +5,7 @@ import java.util.Base64;
 
 public final class StateNonceGenerator {
     private static final SecureRandom RNG = new SecureRandom();
+    private static final int TOKEN_BYTES = 16;
 
     private StateNonceGenerator() {}
 
@@ -12,7 +13,7 @@ public final class StateNonceGenerator {
     public static String nonce() { return randomBase64Url(); }
 
     private static String randomBase64Url() {
-        byte[] b = new byte[16];
+        byte[] b = new byte[TOKEN_BYTES];
         RNG.nextBytes(b);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(b);
     }
