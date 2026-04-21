@@ -15,7 +15,7 @@ public class TokenRequestFactory {
         this.props = props;
     }
 
-    public AuthorizationCodeTokenRequest buildAuthCode(String code) {
+    public AuthorizationCodeTokenRequest buildTokenExchangeRequest(String code) {
         return new AuthorizationCodeTokenRequest()
                 .clientId(props.getClient().getClientId())
                 .clientSecret(props.getClient().getClientSecret())
@@ -23,7 +23,7 @@ public class TokenRequestFactory {
                 .code(code);
     }
 
-    public OauthTokenRequest buildCiba(UUID authReqId) {
+    public OauthTokenRequest buildTokenPollingRequest(UUID authReqId) {
         return new OauthTokenRequest()
                 .clientId(props.getClient().getClientId())
                 .clientSecret(props.getClient().getClientSecret())

@@ -20,13 +20,4 @@ public class SigningSessionValidator {
         if (!nonce.equals(session.nonce())) throw new IllegalArgumentException("Invalid nonce for state");
         return session;
     }
-
-    public SigningSession validateIfPresent(String state, String nonce) {
-        requireNonBlank(state, "Missing state");
-        requireNonBlank(nonce, "Missing nonce");
-        SigningSession session = sessions.get(state);
-        if (session == null) return null;
-        if (!nonce.equals(session.nonce())) throw new IllegalArgumentException("Invalid nonce for state");
-        return session;
-    }
 }

@@ -97,10 +97,7 @@ public class CibaStartService {
         return new CibaStartResponse(
                 ctx.state(),
                 ctx.nonce(),
-                requireNonBlank(resp.getAuthReqId().toString(), "CIBA response missing auth_req_id"),
-                resp.getExpiresIn(),
-                resp.getInterval(),
-                resp.getIdentProcessData()
+                requireNonBlank(resp.getAuthReqId().toString(), "CIBA response missing auth_req_id")
         );
     }
 }

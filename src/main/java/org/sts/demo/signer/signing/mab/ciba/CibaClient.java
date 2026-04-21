@@ -14,32 +14,30 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.sts.demo.signer.oidc.endpoints.OidcEndpoints;
 import reactor.core.publisher.Mono;
 
+import static org.sts.demo.signer.signing.util.FormPrettyPrinter.prettyPrint;
+
 @Component
 public class CibaClient {
     private static final Logger log = LoggerFactory.getLogger(CibaClient.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final ObjectMapper objectMapper;
     private final WebClient mtlsWebClient;
     private final OidcEndpoints endpoints;
 
     public CibaClient(
             @Qualifier("qtspMtlsWebClient") WebClient mtlsWebClient,
-            OidcEndpoints endpoints
+            OidcEndpoints endpoints,
+            ObjectMapper objectMapper
     ) {
         this.mtlsWebClient = mtlsWebClient;
         this.endpoints = endpoints;
+        this.objectMapper = objectMapper;
     }
 
     public Mono<OauthAuthenticationResponse> authenticate(CibaRequestPayload req) {
         MultiValueMap<String, String> form = toAuthForm(req);
 
-        String prettyForm;
-        try {
-            prettyForm = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(form);
-        } catch (Exception e) {
-            prettyForm = form.toString();
-        }
-        log.info("CIBA Auth form payload={}", prettyForm);
+        log.info("CIBA Auth form payload={}", prettyPrint(objectMapper, form));
         log.info("CIBA Auth POST {}", endpoints.cibaAuthUri());
 
         return mtlsWebClient.post()

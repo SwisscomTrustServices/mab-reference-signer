@@ -16,15 +16,14 @@ import org.sts.demo.signer.web.dto.CibaWebfingerResponse;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.time.Duration;
 
 import static org.sts.demo.signer.signing.mab.AuthPolicy.policyFor;
 import static org.sts.demo.signer.signing.util.ValidationUtils.requireNonBlank;
 
 @Service
 public class WebfingerService {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final ObjectMapper objectMapper;
     private final WebClient mtlsWebClient;
     private final OidcEndpoints endpoints;
     private final QtspProperties props;
@@ -33,10 +32,12 @@ public class WebfingerService {
 
     public WebfingerService(@Qualifier("qtspMtlsWebClient") WebClient mtlsWebClient,
                             OidcEndpoints endpoints,
-                            QtspProperties props) {
+                            QtspProperties props,
+                            ObjectMapper objectMapper) {
         this.mtlsWebClient = mtlsWebClient;
         this.endpoints = endpoints;
         this.props = props;
+        this.objectMapper = objectMapper;
     }
 
     public Mono<CibaWebfingerResponse> checkIdentifier(String identifier, SigningJourney journey) {
@@ -67,7 +68,6 @@ public class WebfingerService {
                     }
                     if (status >= 200 && status < 300) {
                         return resp.bodyToMono(String.class)
-                                .timeout(Duration.ofSeconds(10))
                                 .doOnNext(body -> log.info("Webfinger success status={} body={}", status, body))
                                 .map(this::toResponse);
                     }
@@ -82,7 +82,7 @@ public class WebfingerService {
 
     private CibaWebfingerResponse toResponse(String body) {
         try {
-            JsonNode root = MAPPER.readTree(body);
+            JsonNode root = objectMapper.readTree(body);
             JsonNode properties = root.path("properties");
             String eligible = text(properties.path("urn:mab:sign:eligible"));
             boolean onboarded = "true".equalsIgnoreCase(eligible);
@@ -105,4 +105,3 @@ public class WebfingerService {
         return (value == null || value.isBlank()) ? null : value;
     }
 }
-

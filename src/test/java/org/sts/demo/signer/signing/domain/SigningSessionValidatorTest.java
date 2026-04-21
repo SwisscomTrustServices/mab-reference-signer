@@ -33,28 +33,6 @@ class SigningSessionValidatorTest {
         assertNull(store.remove("stateB"), "state should still be consumed to prevent brute-force nonce guessing");
     }
 
-    @Test
-    void validateIfPresent_shouldReturnNullForMissingState() {
-        SigningSessionStore store = new SigningSessionStore();
-        SigningSessionValidator v = new SigningSessionValidator(store);
-
-        assertNull(v.validateIfPresent("unknown", "nonce"));
-    }
-
-    @Test
-    void validateIfPresent_shouldNotConsumeState() {
-        SigningSessionStore store = new SigningSessionStore();
-        SigningSessionValidator v = new SigningSessionValidator(store);
-
-        var s = new SigningSession("stateC", "nonceC", "digest", HashAlgorithm.SHA256, CredentialId.ADVANCED4, null, new NoopDoc());
-        store.put(s);
-
-        SigningSession lookedUp = v.validateIfPresent("stateC", "nonceC");
-        assertEquals("stateC", lookedUp.state());
-
-        assertNotNull(store.remove("stateC"), "state should remain available for later steps");
-    }
-
     static final class NoopDoc implements DocumentSigningContext {
         @Override public byte[] getContentToSign() { return new byte[0]; }
         @Override public byte[] embedCms(byte[] cmsSignature) { return new byte[0]; }
