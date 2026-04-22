@@ -50,25 +50,29 @@ To run this demo against Swisscom preprod you need:
 ## Configuration
 
 This project is safe for public repositories and does not contain real secrets.
-All values are injected via environment variables referenced from `src/main/resources/application.yaml`.
+All configuration parameters are present in `src/main/resources/application.yaml`. They can be injected with environment variables or overridden for local development.
 
-### application.yml (defaults)
+### Overriding in application-dev.yaml
 
-The repository ships with safe defaults like:
-- `CLIENT_ID=00000000-0000-0000-0000-000000000000`
-- `MTLS_BASE_URL=https://example.invalid`
+All configuration parameters in `src/main/resources/application.yaml` can be overridden in `application-dev.yaml` for local development.
 
-These are the exact variable names currently referenced by the app:
+Sample `application-dev.yaml`:
 
-- `DISCOVERY_PATH`
-- `CLIENT_ID`
-- `CLIENT_SECRET`
-- `REDIRECT_URI`
-- `MTLS_BASE_URL`
-- `MTLS_CLIENT_CERT`
-- `MTLS_CLIENT_KEY`
+```dotenv
+qtsp:
+  oidc:
+    discovery-path: https://example.invalid/.well-known/openid-configuration
+  client:
+    client-id: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    client-secret: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    redirect-uri: https://webhook.site/<your-id>
+  mtls:
+    base-url: https://example.invalid
+    client-cert: classpath:test-client.pem
+    client-key: classpath:test-client.key
+```
 
-They can be set for local development in application-dev.yaml.
+> **Warning:** Never commit your `application-dev.yaml` file to any repository. This file may contain sensitive credentials or configuration values intended only for your local environment.
 
 ### Using a local `.env` file
 
@@ -84,9 +88,11 @@ Sample `.env`:
 
 ```dotenv
 DISCOVERY_PATH=https://example.invalid/.well-known/openid-configuration
+
 CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 CLIENT_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 REDIRECT_URI=https://webhook.site/<your-id>
+
 MTLS_BASE_URL=https://example.invalid
 MTLS_CLIENT_CERT=file:/absolute/path/to/client-cert.pem
 MTLS_CLIENT_KEY=file:/absolute/path/to/client-key.pem
@@ -98,7 +104,7 @@ For `MTLS_CLIENT_CERT` and `MTLS_CLIENT_KEY`, use Spring resource syntax such as
 
 ### Exported environment variables
 
-If you prefer, you can still export the variables manually before starting the app.
+If you prefer, you can also export the variables manually before starting the app.
 If a variable is defined both in the `.env` file and as an exported OS environment variable, the OS environment variable takes precedence. This allows you to keep local defaults in `.env` while still being able to override them per shell or CI job.
 
 ```bash
@@ -112,8 +118,6 @@ export MTLS_BASE_URL="https://example.invalid"
 export MTLS_CLIENT_CERT="file:/absolute/path/to/client-cert.pem"
 export MTLS_CLIENT_KEY="file:/absolute/path/to/client-key.pem"
 ```
-
-For local development you can also point the redirect URI to any endpoint that lets you inspect the URL parameters and copy the authorization code.
 
 ## Run the Demo
 
