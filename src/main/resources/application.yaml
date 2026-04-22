@@ -25,5 +25,7 @@ logging:
     io.netty.handler.ssl.BouncyCastlePemReader: ERROR
 
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   profiles:
     active: "${SPRING_PROFILES_ACTIVE:dev}"

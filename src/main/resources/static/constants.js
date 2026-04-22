@@ -14,6 +14,8 @@ export const CIBA_DEFAULT_POLL_TIMEOUT_SEC = 120;
 export const CIBA_POLL_STATUS_READY = "READY";
 export const CIBA_POLL_STATUS_PENDING = "PENDING";
 
+export const PAR_CONTEXT_STORAGE_KEY = "demoSigner.parContext.v1";
+
 export const API = {
     PAR_AUTH: "/api/par/auth",
     PAR_TOKEN: "/api/par/token",
@@ -22,4 +24,3 @@ export const API = {
     CIBA_TOKEN: "/api/ciba/token",
     ETSI_SIGN: "/api/etsi/sign"
 };
-
