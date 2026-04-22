@@ -1,4 +1,4 @@
-# Demo Signer (MAB + ETSI Sign)
+# Demo Signer (MAB Auth + ETSI Sign)
 
 This project is a minimal end-to-end demo that shows how to integrate the Swisscom Trust Services Multiple Authentication Broker (MAB) APIs and the ETSI Sign API.
 
@@ -11,7 +11,7 @@ It is built as a reference implementation for:
 - Calling the ETSI signDoc endpoint to sign a document digest 
 - Providing a small browser UI for manual testing
 - Preparing a PDF for signature with PDFBox
-- Embedding the returned CMS signature back into the PDF to obtain a final, signed PDF without modifying the signed byte ranges
+- Embedding the returned CMS signature back into the PDF to get a final, signed PDF without modifying the signed byte ranges
 - Adding PAdES DSS/VRI structures to upgrade the signature to Baseline B-LT (LTV enabled)
 
 ## PAR Flow Sequence Diagram
@@ -93,6 +93,8 @@ MTLS_CLIENT_KEY=file:/absolute/path/to/client-key.pem
 ```
 
 For `MTLS_CLIENT_CERT` and `MTLS_CLIENT_KEY`, use Spring resource syntax such as `file:/absolute/path/to/client-cert.pem` or `classpath:...`.
+
+> **Warning:** Never commit your `.env` file to any repository. This file may contain sensitive credentials or configuration values intended only for your local environment.
 
 ### Exported environment variables
 
