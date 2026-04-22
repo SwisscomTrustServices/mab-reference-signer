@@ -20,7 +20,8 @@ import {
     CIBA_IDENTIFIER_PATTERN,
     CIBA_QES_FAMILY,
     CIBA_QES_IDENT_JOURNEY,
-    CIBA_QES_SIGN_JOURNEY
+    CIBA_QES_SIGN_JOURNEY,
+    PAR_CONTEXT_STORAGE_KEY
 } from "/constants.js";
 import {pollCibaTokenUiLoop, setCibaPollCountdown, setCibaPollingUi} from "/ciba-poll.js";
 
@@ -89,6 +90,18 @@ function resetForStep1() {
 
     el.authLink.href = "#";
     setAuthLinkEnabled(false);
+
+    const restoredParContext = restoreParContext();
+    if (restoredParContext) {
+        if (lastAuthorizationUrl) {
+            authLink.href = lastAuthorizationUrl;
+            setAuthLinkEnabled(true);
+            setStatus(authStatus, "ok", "Recovered PAR context from browser storage.");
+        }
+        setStatus(parStatus, "ok", "Recovered previous state/nonce from browser storage.");
+    }
+    hydrateFromCallbackUrl();
+
     setStatus(el.authStatus, "muted", "Create PAR first.");
 
     el.tokenOut.textContent = "{}";
@@ -183,6 +196,7 @@ async function handleParSubmit(e) {
 
             el.authLink.href = state.lastAuthorizationUrl;
             setAuthLinkEnabled(true);
+            persistParContext();
             setStatus(el.parStatus, "ok", "PAR created");
             setStatus(el.authStatus, "ok", "Ready - click Open QTSP Auth");
             el.authCode.focus();
@@ -409,6 +423,69 @@ function init() {
 
     setStep1Tab("par");
     updateCibaJourneyUi();
+}
+
+// PAR context
+
+function persistParContext() {
+    try {
+        if (!lastState || !lastNonce) {
+            localStorage.removeItem(PAR_CONTEXT_STORAGE_KEY);
+            return;
+        }
+        localStorage.setItem(PAR_CONTEXT_STORAGE_KEY, JSON.stringify({
+            lastAuthorizationUrl,
+            lastState,
+            lastNonce,
+            lastClientSessionId
+        }));
+    } catch {
+        // storage can be blocked; UI still works in current tab memory.
+    }
+}
+
+function restoreParContext() {
+    try {
+        const raw = localStorage.getItem(PAR_CONTEXT_STORAGE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.lastState || !parsed.lastNonce) return false;
+
+        state.lastAuthorizationUrl = parsed.lastAuthorizationUrl || null;
+        state.lastState = parsed.lastState || null;
+        state.lastNonce = parsed.lastNonce || null;
+        state.lastClientSessionId = parsed.lastClientSessionId || null;
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function hydrateFromCallbackUrl() {
+    const params = new URLSearchParams(window.location.search || "");
+    const codeFromUrl = (params.get("code") || "").trim();
+    const stateFromUrl = (params.get("state") || "").trim();
+
+    if (codeFromUrl && !authCode.value) {
+        authCode.value = codeFromUrl;
+    }
+
+    if (stateFromUrl) {
+        if (lastState && lastState !== stateFromUrl) {
+            setStatus(tokenStatus, "err", "Callback state does not match stored PAR state - run step 1 again");
+            return;
+        }
+        state.lastState = stateFromUrl;
+    }
+
+    if (stateFromUrl) {
+        if (!lastNonce) {
+            setStatus(tokenStatus, "err", "Found state/code in URL, but nonce is missing in this browser context - run step 1 again");
+        } else {
+            setStatus(authStatus, "ok", "Callback params detected in URL. You can exchange token now.");
+            persistParContext();
+        }
+    }
 }
 
 init();
